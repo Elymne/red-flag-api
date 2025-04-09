@@ -2,6 +2,10 @@
 
 namespace Domain;
 
+/**
+ * Can be an article, Youtube video.
+ * All theses links shoudl be certified from safe sources.
+ */
 readonly class RedFlagLink
 {
     public function __construct(

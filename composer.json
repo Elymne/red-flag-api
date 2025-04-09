@@ -21,6 +21,7 @@
         }
     },
     "require": {
-        "ramsey/uuid": "^4.7"
+        "ramsey/uuid": "^4.7",
+        "nikic/fast-route": "^1.3"
     }
 }
