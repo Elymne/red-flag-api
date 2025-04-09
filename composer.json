@@ -1,0 +1,26 @@
+{
+    "name": "sacha_djurdjevic/red-flag-api",
+    "description": "API REST pour communiquer de l'app mobile RedFlag vers une db pour stocker la data nécessaire.",
+    "version": "1.0.0-beta",
+    "authors": [
+        {
+            "name": "Sacha Djurdjevic",
+            "email": "sacha.djudjevic@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Core\\": "src/core",
+            "Domain\\": [
+                "src/domain",
+                "src/domain/models"
+            ],
+            "Infra\\": [
+                "src/infra/router"
+            ]
+        }
+    },
+    "require": {
+        "ramsey/uuid": "^4.7"
+    }
+}
