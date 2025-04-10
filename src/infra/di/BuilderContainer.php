@@ -3,15 +3,14 @@
 namespace Infra\Di;
 
 use Domain\Gateways\DatabaseGateway;
-use Domain\Gateways\EnvGateway;
 use Domain\Gateways\RouterGateway;
 use Domain\Repositories\LocalPersonRepository;
 use Domain\Repositories\RemoteCityRepository;
-use Domain\Usecases\Start;
+use Domain\Usecases\Run;
+use Domain\Usecases\RunMigrations;
 use Infra\Datasources\DBConnect;
 use Infra\Datasources\GeoApiDatasource;
 use Infra\Datasources\PersonMysqlDatasource;
-use Infra\Env\Env;
 use Infra\Router\Router;
 
 class BuilderContainer
@@ -56,10 +55,15 @@ class BuilderContainer
     {
         $container = Container::get();
 
-        $container->add(Start::class, function () use ($container) {
-            return new Start(
-                $container->resolve(DatabaseGateway::class),
+        $container->add(Run::class, function () use ($container) {
+            return new Run(
                 $container->resolve(RouterGateway::class),
+            );
+        });
+
+        $container->add(RunMigrations::class, function () use ($container) {
+            return new RunMigrations(
+                $container->resolve(DatabaseGateway::class),
             );
         });
     }

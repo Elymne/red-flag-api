@@ -2,7 +2,10 @@
 
 namespace Infra\Router;
 
+use Core\Result;
 use Domain\Gateways\RouterGateway;
+use Domain\Usecases\RunMigrations;
+use Infra\Di\Container;
 use Pecee\SimpleRouter\SimpleRouter;
 
 class Router implements RouterGateway
@@ -27,6 +30,20 @@ class Router implements RouterGateway
 
             // Implements all Persons routes.
             PersonRouter::defineRoutes();
+        });
+
+        SimpleRouter::get('/migrations', function () {
+            if ($_ENV["MODE"] == "develop") {
+                /** @var Result */
+                $result = Container::get()->resolve(RunMigrations::class)->perform();
+                http_response_code($result->code);
+                echo json_encode($result->data);
+                exit;
+            }
+
+            http_response_code(404);
+            echo "This route does not exists.";
+            exit;
         });
 
         // Start the routing

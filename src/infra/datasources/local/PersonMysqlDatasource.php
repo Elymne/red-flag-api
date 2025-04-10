@@ -5,8 +5,6 @@ namespace Infra\Datasources;
 use Domain\Models\Person;
 use Domain\Models\PersonDetailed;
 use Domain\Repositories\LocalPersonRepository;
-use Infra\Data\DBConnect;
-use Ramsey\Uuid\Uuid;
 
 class PersonMysqlDatasource implements LocalPersonRepository
 {
