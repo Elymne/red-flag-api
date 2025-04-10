@@ -2,9 +2,11 @@
 
 namespace Infra\Datasources;
 
+use Domain\Models\Person;
 use Domain\Models\PersonDetailed;
 use Domain\Repositories\LocalPersonRepository;
 use Infra\Data\DBConnect;
+use Ramsey\Uuid\Uuid;
 
 class PersonMysqlDatasource implements LocalPersonRepository
 {
@@ -16,39 +18,53 @@ class PersonMysqlDatasource implements LocalPersonRepository
     }
 
     public function findMany(
-        string|null $id = null,
         string|null $firstname = null,
         string|null $surname = null,
-        string|null $fullname = null,
-        array|null $city = null
+        string|null $cityName = null
     ): array {
+        // Prapare the statement.
+        /** @var string */
+        $query = "SELECT HEX(id) as id, first_name, last_name, id_code, created_at, updated_at FROM person WHERE 1=1";
+        if (!is_null($firstname)) {
+            $query .= " AND first_name = ?";
+        }
+        if (!is_null($surname)) {
+            $query .= " AND last_name = ?";
+        }
+        if (!is_null($cityName)) {
+            $query .= " AND id_city = ?";
+        }
+        $stmt = $this->_db->getMysqli()->prepare($query);
+
+        // Inject the value.
+        $params = [];
+        if (!is_null($firstname)) {
+            $params[] = $firstname;
+        }
+        if (!is_null($surname)) {
+            $params[] = $surname;
+        }
+        if (!is_null($cityName)) {
+            $params[] = $cityName;
+        }
+        if (!empty($params)) {
+            $stmt->bind_param(str_repeat('s', count($params)), ...$params);
+        }
+
         /** @var Person[] */
         $persons = [];
 
-        /** @var mysqli_stmt|false */
-        $stmt = $this->_db->getMysqli()->prepare(
-            "SELECT HEX(a.id) as id, a.title, a.description, a.img_url, a.created_at, a.updated_at, a.state_id, HEX(u.id) as user_id, u.username, u.user_role_id
-            FROM article as a
-            INNER JOIN user as u ON a.user_id = u.id"
-        );
         $stmt->execute();
         $result = $stmt->get_result();
 
-        // Parser.
         // while ($row = $result->fetch_assoc()) {
-        //     array_push($articles, new Article(
-        //         Uuid::fromString($row["id"]),
-        //         new User(
-        //             Uuid::fromString($row["user_id"]),
-        //             $row["username"],
-        //             Role::from($row["user_role_id"])
-        //         ),
-        //         $row["created_at"],
-        //         $row["updated_at"],
-        //         ContentState::from($row["state_id"]),
-        //         $row["title"],
-        //         $row["description"],
-        //         $row["img_url"],
+        //     array_push($articles, new Person(
+        //        id: Uuid::fromString($row["id"]),
+        //         firstName:$row["first_name"],
+        //         lastName: $row["last_name"],
+        //         city
+
+
         //     ));
         // }
 

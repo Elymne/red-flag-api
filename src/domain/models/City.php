@@ -2,10 +2,6 @@
 
 namespace Domain\Models;
 
-/**
- * Can be an article, Youtube video.
- * All theses links shoudl be certified from safe sources.
- */
 readonly class City
 {
     public function __construct(

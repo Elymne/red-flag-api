@@ -2,24 +2,23 @@
 
 namespace Domain\Usecases;
 
+use Domain\Gateways\DatabaseGateway;
 use Domain\Gateways\EnvGateway;
 use Domain\Gateways\RouterGateway;
 
 class Start
 {
-    private EnvGateway $_envGateway;
+    private DatabaseGateway $_databaseGateway;
     private RouterGateway $_routerGateway;
 
-    public function __construct(EnvGateway $_envGateway, RouterGateway $_routerGateway)
+    public function __construct(DatabaseGateway $databaseGateway, RouterGateway $routerGateway)
     {
-        $this->_envGateway = $_envGateway;
-        $this->_routerGateway = $_routerGateway;
+        $this->_databaseGateway = $databaseGateway;
+        $this->_routerGateway = $routerGateway;
     }
 
     public function perform(): void
     {
-        $this->_envGateway->load();
-
         if ($_ENV["MODE"] == "develop") {
             ini_set('display_errors', 1);
         }
@@ -27,6 +26,8 @@ class Start
         if ($_ENV["MODE"] == "prod") {
             ini_set('display_errors', 0);
         }
+
+        $this->_databaseGateway->checkDatabase();
 
         $this->_routerGateway->start();
     }

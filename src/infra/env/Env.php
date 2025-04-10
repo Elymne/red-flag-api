@@ -2,11 +2,9 @@
 
 namespace Infra\Env;
 
-use Domain\Gateways\EnvGateway;
-
-class Env implements EnvGateway
+class Env
 {
-    public function load(): void
+    public static function load(): void
     {
         $lines = file(".env");
         foreach ($lines as $line) {

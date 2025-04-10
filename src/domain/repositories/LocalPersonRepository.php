@@ -17,7 +17,7 @@ interface LocalPersonRepository
      * @param string[]|null $cities - list of cities names.
      * @return Person[]
      */
-    function findMany(string|null $id = null, string|null $firstname = null, string|null $surname = null, string|null $fullname = null,  array|null $city = null): array;
+    function findMany(string|null $firstname = null, string|null $surname = null, string|null $cityName = null): array;
 
     /**
      * Find a unique RedFlag given the id.

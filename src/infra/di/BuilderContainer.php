@@ -2,12 +2,13 @@
 
 namespace Infra\Di;
 
+use Domain\Gateways\DatabaseGateway;
 use Domain\Gateways\EnvGateway;
 use Domain\Gateways\RouterGateway;
 use Domain\Repositories\LocalPersonRepository;
 use Domain\Repositories\RemoteCityRepository;
 use Domain\Usecases\Start;
-use Infra\Data\DBConnect;
+use Infra\Datasources\DBConnect;
 use Infra\Datasources\GeoApiDatasource;
 use Infra\Datasources\PersonMysqlDatasource;
 use Infra\Env\Env;
@@ -22,6 +23,19 @@ class BuilderContainer
         self::_injectUsecases();
     }
 
+    private static function _injectGateways(): void
+    {
+        $container = Container::get();
+
+        $container->add(DatabaseGateway::class, function () {
+            return DBConnect::get();
+        });
+
+        $container->add(RouterGateway::class, function () {
+            return new Router();
+        });
+    }
+
     /**
      * Inject all objects that implements my repositories.
      */
@@ -33,25 +47,8 @@ class BuilderContainer
             return new GeoApiDatasource();
         });
 
-        $container->add(DBConnect::class, function () {
-            return DBConnect::get();
-        });
-
         $container->add(LocalPersonRepository::class, function () use ($container) {
-            return new PersonMysqlDatasource($container->resolve(DBConnect::class));
-        });
-    }
-
-    private static function _injectGateways(): void
-    {
-        $container = Container::get();
-
-        $container->add(EnvGateway::class, function () {
-            return new Env();
-        });
-
-        $container->add(RouterGateway::class, function () {
-            return new Router();
+            return new PersonMysqlDatasource($container->resolve(DatabaseGateway::class));
         });
     }
 
@@ -61,7 +58,7 @@ class BuilderContainer
 
         $container->add(Start::class, function () use ($container) {
             return new Start(
-                $container->resolve(EnvGateway::class),
+                $container->resolve(DatabaseGateway::class),
                 $container->resolve(RouterGateway::class),
             );
         });
