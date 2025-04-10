@@ -1,6 +1,6 @@
 <?php
 
-namespace Domain;
+namespace Domain\Models;
 
 /**
  * Can be an article, Youtube video.

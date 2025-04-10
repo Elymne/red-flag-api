@@ -1,8 +1,8 @@
 <?php
 
-namespace Domain;
+namespace Domain\Models;
 
-readonly class RedFlag
+readonly class PersonDetailed
 {
     /**
      * @param RedFlagMessage[] $messages
@@ -13,6 +13,9 @@ readonly class RedFlag
         public string $id,
         public string $first_name,
         public string $last_name,
+
+        public array $messages,
+        public array $links,
         public array $cities,
 
         public int $created_at,

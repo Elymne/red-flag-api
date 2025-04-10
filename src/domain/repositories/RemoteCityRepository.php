@@ -1,6 +1,8 @@
 <?php
 
-namespace Domain;
+namespace Domain\Repositories;
+
+use Domain\Models\City;
 
 interface RemoteCityRepository
 {

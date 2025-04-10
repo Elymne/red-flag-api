@@ -1,6 +1,6 @@
 <?php
 
-namespace Domain;
+namespace Domain\Models;
 
 /**
  * Messages on the current red flags leave by users.

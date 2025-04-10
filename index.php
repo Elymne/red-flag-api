@@ -1,7 +1,7 @@
 <?php
 
-use Infra\Router;
+use Infra\Router\Router;
 
 require "vendor/autoload.php";
 
-Router::useRoutes();
+Router::start();

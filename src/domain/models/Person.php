@@ -1,21 +1,16 @@
 <?php
 
-namespace Domain;
+namespace Domain\Models;
 
-readonly class RedFlagDetailed
+readonly class Person
 {
     /**
-     * @param RedFlagMessage[] $messages
-     * @param RedFlagLink[] $links
      * @param City[] $cities
      */
     public function __construct(
         public string $id,
         public string $first_name,
         public string $last_name,
-
-        public array $messages,
-        public array $links,
         public array $cities,
 
         public int $created_at,

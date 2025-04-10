@@ -1,9 +1,9 @@
 <?php
 
-namespace Infra;
+namespace Infra\Datasources;
 
-use Domain\City;
-use Domain\RemoteCityRepository;
+use Domain\Models\City;
+use Domain\Repositories\RemoteCityRepository;
 
 class GeoApiDatasource implements RemoteCityRepository
 {
