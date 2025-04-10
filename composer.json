@@ -17,7 +17,10 @@
                 "src/infra/router",
                 "src/infra/router/handlers"
             ],
-            "Infra\\Datasources\\": "src/infra/datasources",
+            "Infra\\Datasources\\": [
+                "src/infra/datasources/local",
+                "src/infra/datasources/remote"
+            ],
             "Infra\\DI\\": "src/infra/di"
         }
     },
