@@ -22,8 +22,37 @@ class PersonMysqlDatasource implements LocalPersonRepository
         string|null $fullname = null,
         array|null $city = null
     ): array {
-        // Implement the logic to find and return multiple records
-        return [];
+        /** @var Person[] */
+        $persons = [];
+
+        /** @var mysqli_stmt|false */
+        $stmt = $this->_db->getMysqli()->prepare(
+            "SELECT HEX(a.id) as id, a.title, a.description, a.img_url, a.created_at, a.updated_at, a.state_id, HEX(u.id) as user_id, u.username, u.user_role_id
+            FROM article as a
+            INNER JOIN user as u ON a.user_id = u.id"
+        );
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        // Parser.
+        // while ($row = $result->fetch_assoc()) {
+        //     array_push($articles, new Article(
+        //         Uuid::fromString($row["id"]),
+        //         new User(
+        //             Uuid::fromString($row["user_id"]),
+        //             $row["username"],
+        //             Role::from($row["user_role_id"])
+        //         ),
+        //         $row["created_at"],
+        //         $row["updated_at"],
+        //         ContentState::from($row["state_id"]),
+        //         $row["title"],
+        //         $row["description"],
+        //         $row["img_url"],
+        //     ));
+        // }
+
+        return $persons;
     }
 
     public function findUnique(string $id): PersonDetailed|null

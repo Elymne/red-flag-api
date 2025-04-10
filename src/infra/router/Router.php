@@ -2,11 +2,12 @@
 
 namespace Infra\Router;
 
+use Domain\Gateways\RouterGateway;
 use Pecee\SimpleRouter\SimpleRouter;
 
-class Router
+class Router implements RouterGateway
 {
-    public static function start(): void
+    public function start(): void
     {
         // Group all routes to trigger my middleware and catch errors.
         SimpleRouter::group([

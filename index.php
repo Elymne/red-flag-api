@@ -1,7 +1,10 @@
 <?php
 
-use Infra\Router\Router;
+use Domain\Usecases\Start;
+use Infra\Di\BuilderContainer;
+use Infra\Di\Container;
 
 require "vendor/autoload.php";
 
-Router::start();
+BuilderContainer::injectAll();
+Container::get()->resolve(Start::class)->perform();

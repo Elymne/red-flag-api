@@ -6,6 +6,10 @@ use Infra\Datasources\GeoApiDatasource;
 use Pecee\SimpleRouter\SimpleRouter;
 use Throwable;
 
+/**
+ * @static
+ * Full static functions to build route relatives to cities.
+ */
 class CityRouter
 {
     public static function defineRoutes(): void
