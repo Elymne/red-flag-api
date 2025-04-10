@@ -17,7 +17,7 @@ interface RemoteCityRepository
      * Fetch the unique city given the code (id).
      * 
      * @param string $id
-     * @return City - The unique city
+     * @return City|null - The unique city
      */
-    function findUnique(string $id): City;
+    function findUnique(string $id): City|null;
 }
