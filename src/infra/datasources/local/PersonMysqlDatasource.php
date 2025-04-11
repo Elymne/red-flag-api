@@ -22,7 +22,7 @@ class PersonMysqlDatasource implements LocalPersonRepository
 
     public function findMany(
         string|null $firstname = null,
-        string|null $surname = null,
+        string|null $lastName = null,
         string|null $zoneName = null
     ): array {
         // Prapare the statement.
@@ -31,7 +31,7 @@ class PersonMysqlDatasource implements LocalPersonRepository
         if (!is_null($firstname)) {
             $query .= " AND first_name = ?";
         }
-        if (!is_null($surname)) {
+        if (!is_null($lastName)) {
             $query .= " AND last_name = ?";
         }
         if (!is_null($zoneName)) {
@@ -43,8 +43,8 @@ class PersonMysqlDatasource implements LocalPersonRepository
         if (!is_null($firstname)) {
             $params[] = $firstname;
         }
-        if (!is_null($surname)) {
-            $params[] = $surname;
+        if (!is_null($lastName)) {
+            $params[] = $lastName;
         }
         if (!is_null($zoneName)) {
             $params[] = $zoneName;

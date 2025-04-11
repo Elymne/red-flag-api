@@ -22,7 +22,8 @@
                 "src/domain/gateways"
             ],
             "Domain\\Usecases\\": [
-                "src/domain/usecases"
+                "src/domain/usecases",
+                "src/domain/params"
             ],
             "Infra\\Router\\": [
                 "src/infra/router",

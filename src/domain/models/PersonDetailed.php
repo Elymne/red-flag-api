@@ -4,18 +4,19 @@ namespace Domain\Models;
 
 use Ramsey\Uuid\UuidInterface;
 
-readonly class PersonDetailed
+readonly class PersonDetailed extends Person
 {
     public function __construct(
-        public UuidInterface $id,
-        public string $firstName,
-        public string $lastName,
+        UuidInterface $id,
+        string $firstName,
+        string $lastName,
+        Zone $zone,
+        int $createdAt,
+        int|null $updatedAt,
 
-        public Zone $zone,
         public array $messages,
         public array $links,
-
-        public int $createdAt,
-        public int $updatedAt,
-    ) {}
+    ) {
+        parent::__construct($id, $firstName, $lastName, $zone, $createdAt, $updatedAt);
+    }
 }

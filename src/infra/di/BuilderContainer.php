@@ -8,6 +8,7 @@ use Domain\Models\Zone;
 use Domain\Repositories\LocalPersonRepository;
 use Domain\Repositories\LocalZoneRepository;
 use Domain\Repositories\RemoteZoneRepository;
+use Domain\Usecases\FindCities;
 use Domain\Usecases\InsertPerson;
 use Domain\Usecases\Run;
 use Domain\Usecases\RunMigrations;
@@ -73,6 +74,10 @@ class BuilderContainer
             return new RunMigrations(
                 $container->resolve(DatabaseGateway::class),
             );
+        });
+
+        $container->add(FindCities::class, function () use ($container) {
+            return new FindCities();
         });
 
         $container->add(InsertPerson::class, function () use ($container) {

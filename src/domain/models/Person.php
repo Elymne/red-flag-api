@@ -13,6 +13,6 @@ readonly class Person
         public Zone $zone,
 
         public int $createdAt,
-        public int $updatedAt,
+        public int|null $updatedAt,
     ) {}
 }
