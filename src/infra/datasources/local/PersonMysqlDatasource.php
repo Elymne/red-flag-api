@@ -8,8 +8,9 @@ use Domain\Models\RedFlagLink;
 use Domain\Models\RedFlagMessage;
 use Domain\Models\Zone;
 use Domain\Repositories\LocalPersonRepository;
-use Exception;
 use Ramsey\Uuid\Uuid;
+use Ramsey\Uuid\UuidInterface;
+use Exception;
 
 class PersonMysqlDatasource implements LocalPersonRepository
 {
@@ -76,17 +77,20 @@ class PersonMysqlDatasource implements LocalPersonRepository
         return $persons;
     }
 
-    public function findUnique(string $id): PersonDetailed|null
+    /**
+     * @param UuidInterface $id
+     */
+    public function findUnique(UuidInterface $id): PersonDetailed|null
     {
         // Prapare the statement for link data.
         $query =
-            "SELECT HEX(id_person) as id_person, HEX(id_red_flag_link) as id_red_flag_link, l.value, l.created_at, l.updated_at 
-            FROM red_flag_link_join
-            INNER JOIN red_flag_link as l ON l.id = id_red_flag_link 
+            "SELECT HEX(id_person) as id_person, HEX(id_link) as id_link, l.value, l.created_at, l.updated_at 
+            FROM person_link
+            INNER JOIN link as l ON l.id = id_link 
             WHERE id_person = ?";
         $stmt = $this->_db->getMysqli()->prepare($query);
         // Inject the value.
-        $stmt->bind_param("s", [$id]);
+        $stmt->bind_param("s", $id->getBytes());
         // Run SQL Command and fetch result.
         $stmt->execute();
         $linksResult = $stmt->get_result();
@@ -95,7 +99,7 @@ class PersonMysqlDatasource implements LocalPersonRepository
         $links = [];
         while ($row = $linksResult->fetch_assoc()) {
             array_push($links, new RedFlagLink(
-                id: Uuid::fromString($row["id_red_flag_link"]),
+                id: Uuid::fromString($row["id_link"]),
                 value: $row["l.value"],
                 createdAt: $row["l.created_at"],
                 updatedAt: $row["l.updated_at"],
@@ -104,13 +108,13 @@ class PersonMysqlDatasource implements LocalPersonRepository
 
         // Prapare the statement for message data.
         $query =
-            "SELECT HEX(id_person) as id_person, HEX(id_red_flag_message) as id_red_flag_message, m.value, m.created_at, m.updated_at 
-            FROM red_flag_message_join
-            INNER JOIN red_flag_message as m ON m.id = id_red_flag_message
+            "SELECT HEX(id_person) as id_person, HEX(id_message) as id_message, m.value, m.created_at, m.updated_at 
+            FROM person_message
+            INNER JOIN message as m ON m.id = id_message
             WHERE id_person = ?";
         $stmt = $this->_db->getMysqli()->prepare($query);
         // Inject the value.
-        $stmt->bind_param("s", [$id]);
+        $stmt->bind_param("s", [$id->getBytes()]);
         // Run SQL Command and fetch result.
         $stmt->execute();
         $messagesResult = $stmt->get_result();
@@ -119,7 +123,7 @@ class PersonMysqlDatasource implements LocalPersonRepository
         $messages = [];
         while ($row = $messagesResult->fetch_assoc()) {
             array_push($messages, new RedFlagMessage(
-                id: Uuid::fromString($row["id_red_flag_message"]),
+                id: Uuid::fromString($row["id_message"]),
                 value: $row["m.value"],
                 createdAt: $row["m.created_at"],
                 updatedAt: $row["m.updated_at"],
@@ -135,7 +139,7 @@ class PersonMysqlDatasource implements LocalPersonRepository
             WHERE id = ?";
         $stmt = $this->_db->getMysqli()->prepare($query);
         // Inject the value.
-        $stmt->bind_param("s", [$id]);
+        $stmt->bind_param("s", [$id->getBytes()]);
         // Run SQL Command and fetch result.
         $stmt->execute();
         $PersonsResult = $stmt->get_result();
@@ -169,7 +173,7 @@ class PersonMysqlDatasource implements LocalPersonRepository
     }
 
 
-    function createOne(Person $person): Person
+    function createOne(Person $person): void
     {
         // Prepare statement for person.
         /** @var string */
@@ -179,21 +183,36 @@ class PersonMysqlDatasource implements LocalPersonRepository
         $stmt->bind_param("isssss", $person->id->getBytes(), $person->firstName, $person->lastName, $person->createdAt, $person->updatedAt, $person->zone->id);
         // Run SQL Command and fetch result.
         $stmt->execute();
-        // Check if result is a success or not.
-        if (!$stmt->get_result()) {
-            throw new Exception("CityMysqlDatasource Exception : Failure on creating a new person.");
-        }
-        // Return the created value.
-        return $person;
     }
 
-    function addMessage(string $id, string $value): RedFlagMessage
+    /**
+     * @param UuidInterface $id
+     */
+    function addMessage(UuidInterface $id, string $value): void
     {
-        throw "Not implemented";
+        // Prepare statement for person.
+        /** @var string */
+        $query = "INSERT INTO message (id, value) VALUES (?, ?)";
+        $stmt = $this->_db->getMysqli()->prepare($query);
+        // Inject values.
+        $stmt->bind_param("is", $id->getBytes(), $value);
+        // Run SQL Command and fetch result.
+        $stmt->execute();
     }
 
-    function addLink(string $id, string $value): RedFlagLink
+
+    /**
+     * @param UuidInterface $id
+     */
+    function addLink(UuidInterface $id, string $value): void
     {
-        throw "Not implemented";
+        // Prepare statement for person.
+        /** @var string */
+        $query = "INSERT INTO link (id, value) VALUES (?, ?)";
+        $stmt = $this->_db->getMysqli()->prepare($query);
+        // Inject values.
+        $stmt->bind_param("is", $id->getBytes(), $value);
+        // Run SQL Command and fetch result.
+        $stmt->execute();
     }
 }

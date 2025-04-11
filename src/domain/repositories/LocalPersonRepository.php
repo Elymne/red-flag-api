@@ -6,6 +6,7 @@ use Domain\Models\Person;
 use Domain\Models\PersonDetailed;
 use Domain\Models\RedFlagLink;
 use Domain\Models\RedFlagMessage;
+use Ramsey\Uuid\UuidInterface;
 
 interface LocalPersonRepository
 {
@@ -28,7 +29,7 @@ interface LocalPersonRepository
      * @param string $id
      * @return PersonDetailed
      */
-    function findUnique(string $id): PersonDetailed|null;
+    function findUnique(UuidInterface $id): PersonDetailed|null;
 
     /**
      * Create a new person entry in local database.
@@ -38,7 +39,7 @@ interface LocalPersonRepository
      * If a person that seem exactly like the one given on params exists, then we just return this one.
      * @return PersonDetailed The detailed person created with unique ID.
      */
-    function createOne(Person $person): Person;
+    function createOne(Person $person): void;
 
     /**
      * Add a message about a person in database.
@@ -47,7 +48,7 @@ interface LocalPersonRepository
      * @param string $message The new message to add to the person.
      * @return PersonDetailed The detailed person updated with new message.
      */
-    function addMessage(string $id, string $value): RedFlagMessage;
+    function addMessage(UuidInterface $id, string $value): void;
 
     /**
      * Add a link (resource, article) about a person in database.
@@ -56,5 +57,5 @@ interface LocalPersonRepository
      * @param string $message The new message to add to the person.
      * @return PersonDetailed The detailed person updated with new message.
      */
-    function addLink(string $id, string $value): RedFlagLink;
+    function addLink(UuidInterface $id, string $value): void;
 }
