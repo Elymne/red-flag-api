@@ -30,6 +30,7 @@
             ],
             "Infra\\Datasources\\": [
                 "src/infra/datasources/local",
+                "src/infra/datasources/local/database",
                 "src/infra/datasources/remote"
             ],
             "Infra\\Di\\": [

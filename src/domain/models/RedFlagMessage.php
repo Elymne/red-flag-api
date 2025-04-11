@@ -2,10 +2,12 @@
 
 namespace Domain\Models;
 
+use Ramsey\Uuid\UuidInterface;
+
 readonly class RedFlagMessage
 {
     public function __construct(
-        public string $id,
+        public UuidInterface $id,
         public string $value,
 
         public int $createdAt,

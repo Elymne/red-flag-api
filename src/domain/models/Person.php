@@ -2,13 +2,15 @@
 
 namespace Domain\Models;
 
+use Ramsey\Uuid\UuidInterface;
+
 readonly class Person
 {
     public function __construct(
-        public string $id,
+        public UuidInterface $id,
         public string $firstName,
         public string $lastName,
-        public City $city,
+        public Zone $zone,
 
         public int $createdAt,
         public int $updatedAt,

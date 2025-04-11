@@ -4,13 +4,17 @@ namespace Infra\Di;
 
 use Domain\Gateways\DatabaseGateway;
 use Domain\Gateways\RouterGateway;
+use Domain\Models\Zone;
 use Domain\Repositories\LocalPersonRepository;
-use Domain\Repositories\RemoteCityRepository;
+use Domain\Repositories\LocalZoneRepository;
+use Domain\Repositories\RemoteZoneRepository;
+use Domain\Usecases\InsertPerson;
 use Domain\Usecases\Run;
 use Domain\Usecases\RunMigrations;
 use Infra\Datasources\DBConnect;
 use Infra\Datasources\GeoApiDatasource;
 use Infra\Datasources\PersonMysqlDatasource;
+use Infra\Datasources\ZoneMysqlDatasource;
 use Infra\Router\Router;
 
 class BuilderContainer
@@ -42,12 +46,16 @@ class BuilderContainer
     {
         $container = Container::get();
 
-        $container->add(RemoteCityRepository::class, function () {
+        $container->add(RemoteZoneRepository::class, function () {
             return new GeoApiDatasource();
         });
 
         $container->add(LocalPersonRepository::class, function () use ($container) {
             return new PersonMysqlDatasource($container->resolve(DatabaseGateway::class));
+        });
+
+        $container->add(LocalZoneRepository::class, function () use ($container) {
+            return new ZoneMysqlDatasource($container->resolve(DatabaseGateway::class));
         });
     }
 
@@ -64,6 +72,14 @@ class BuilderContainer
         $container->add(RunMigrations::class, function () use ($container) {
             return new RunMigrations(
                 $container->resolve(DatabaseGateway::class),
+            );
+        });
+
+        $container->add(InsertPerson::class, function () use ($container) {
+            return new InsertPerson(
+                $container->resolve(DatabaseGateway::class),
+                $container->resolve(LocalPersonRepository::class),
+                $container->resolve(LocalZoneRepository::class),
             );
         });
     }
