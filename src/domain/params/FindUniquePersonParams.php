@@ -4,10 +4,9 @@ namespace Domain\Usecases;
 
 use Ramsey\Uuid\UuidInterface;
 
-readonly class InsertMessageParams
+readonly class FindUniquePersonParams
 {
     public function __construct(
-        public UuidInterface $personID,
-        public string $message,
+        public UuidInterface $id,
     ) {}
 }

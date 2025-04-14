@@ -28,9 +28,6 @@ class FindLocalZones extends Usecase
             }
             // Search remote zone.
             $zones = $this->_localZoneRepository->findMany(name: $params->name);
-            if (count($zones) == 0) {
-                return new Result(code: 204, data: null);
-            }
             // Return zones from remotes.
             return new Result(200, $zones);
         } catch (Throwable $err) {

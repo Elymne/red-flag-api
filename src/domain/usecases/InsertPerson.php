@@ -46,10 +46,10 @@ class InsertPerson extends Usecase
             $this->_db->getMysqli()->begin_transaction();
 
             // Check if the zone send from the params exists in our database. When user create a new person, the data that is used for city localisation is provided by a remote datassouce.
-            $zone = $this->_localZoneRepository->findUnique($params->zoneId);
+            $zone = $this->_localZoneRepository->findUnique($params->zoneID);
             if (!$zone) {
                 // Trying to fetch the zone from the remote repo. If it doesn't exists, we just send an error response.
-                $zone = $this->_remoteZoneRepository->findUnique($params->zoneId);
+                $zone = $this->_remoteZoneRepository->findUnique($params->zoneID);
                 if (!$zone) {
                     return new Result(code: 400, data: "Action failure : the zone code does not exists in remote datasource.");
                 }
@@ -57,7 +57,7 @@ class InsertPerson extends Usecase
             }
 
             // Check that user does not exists in database. If it's the case, we just send a 200 response.
-            $usersBeLike = $this->_localPersonRepository->findMany(firstname: $params->firstName, lastName: $params->lastName, zoneName: $params->zoneId);
+            $usersBeLike = $this->_localPersonRepository->findMany(firstname: $params->firstname, lastname: $params->lastname, zonename: $zone->id);
             if (count($usersBeLike) != 0) {
                 return new Result(code: 400, data: "Action failure : the person already exists in database.");
             }
@@ -66,8 +66,8 @@ class InsertPerson extends Usecase
             $this->_localPersonRepository->createOne(
                 new Person(
                     id: Uuid::uuid4(),
-                    firstName: $params->firstName,
-                    lastName: $params->lastName,
+                    firstName: $params->firstname,
+                    lastName: $params->lastname,
                     createdAt: time(),
                     updatedAt: null,
                     zone: $zone

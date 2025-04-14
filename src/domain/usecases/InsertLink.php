@@ -50,13 +50,13 @@ class InsertLink extends Usecase
             }
 
             // check that person exists.
-            $person = $this->_localPersonRepository->findUnique($params->personId);
+            $person = $this->_localPersonRepository->findUnique($params->personID);
             if (!isset($person)) {
                 return new Result(code: 400, data: "Action failure : the person does not exists.");
             }
 
             // Insert the new message.
-            $this->_localPersonRepository->addLink($params->personId, $params->link);
+            $this->_localPersonRepository->addLink($params->personID, $params->link);
 
             // Success response.
             return new Result(code: 201, data: "Action success : new entry in message database.");

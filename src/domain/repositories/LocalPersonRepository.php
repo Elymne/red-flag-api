@@ -14,14 +14,12 @@ interface LocalPersonRepository
      * Find as many as possible Redflags depending of args given to the function.
      * If no args are given, we may return nothing.
      * 
-     * @param string|null $id
      * @param string|null $firstname
-     * @param string|null $surname
-     * @param string|null $fullname
-     * @param string[]|null $cities - list of cities names.
+     * @param string|null $lastName
+     * @param string|null $zoneName
      * @return Person[]
      */
-    function findMany(string|null $firstname = null, string|null $lastName = null, string|null $zoneName = null): array;
+    function findMany(string|null $firstname = null, string|null $lastname = null, string|null $zonename = null): array;
 
     /**
      * Find a unique RedFlag given the id.

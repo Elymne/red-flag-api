@@ -7,7 +7,7 @@ use Ramsey\Uuid\UuidInterface;
 readonly class InsertLinkParams
 {
     public function __construct(
-        public UuidInterface $personId,
+        public UuidInterface $personID,
         public string $link,
     ) {}
 }

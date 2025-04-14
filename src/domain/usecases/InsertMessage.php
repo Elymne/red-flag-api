@@ -28,13 +28,13 @@ class InsertMessage extends Usecase
             }
 
             // check that person exists.
-            $person = $this->_localPersonRepository->findUnique($params->personId);
+            $person = $this->_localPersonRepository->findUnique($params->personID);
             if (!isset($person)) {
                 return new Result(code: 400, data: "Action failure : the person doesn't exists.");
             }
 
             // Insert the new message.
-            $this->_localPersonRepository->addMessage($params->personId, $params->message);
+            $this->_localPersonRepository->addMessage($params->personID, $params->message);
 
             // Success response.
             return new Result(code: 201, data: "Action success : new entry in message database.");
