@@ -7,7 +7,7 @@ use Core\Usecase;
 use Domain\Repositories\LocalPersonRepository;
 use Throwable;
 
-class InsertPerson extends Usecase
+class InsertMessage extends Usecase
 {
     private LocalPersonRepository $_localPersonRepository;
 
@@ -27,9 +27,14 @@ class InsertPerson extends Usecase
                 return new Result(code: 400, data: "Action failure : the data send from body is not correct. Should be a InsertMessageParams structure.");
             }
 
-            // TODO : check that person exists.
+            // check that person exists.
+            $person = $this->_localPersonRepository->findUnique($params->personId);
+            if (!isset($person)) {
+                return new Result(code: 400, data: "Action failure : the person doesn't exists.");
+            }
 
-            // TODO : Insert the new message.
+            // Insert the new message.
+            $this->_localPersonRepository->addMessage($params->personId, $params->message);
 
             // Success response.
             return new Result(code: 201, data: "Action success : new entry in message database.");

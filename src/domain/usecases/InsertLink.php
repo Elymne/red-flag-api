@@ -17,23 +17,46 @@ class InsertLink extends Usecase
     }
 
     /**
-     * @param InsertMessageParams $params
+     * @param InsertLinkParams $params
      */
     public function perform(mixed $params): Result
     {
         try {
             // Check $params type.
-            if (!isset($params) || !($params instanceof InsertMessageParams)) {
+            if (!isset($params) || !($params instanceof InsertLinkParams)) {
                 return new Result(code: 400, data: "Action failure : the data send from body is not correct. Should be a InsertMessageParams structure.");
             }
 
-            // TODO : check that person exists.
+            // Check that the URL uses HTTPS.
+            if (parse_url($params->link, PHP_URL_SCHEME) !== 'https') {
+                return new Result(code: 400, data: "Action failure : the provided link is not a valid HTTPS URL.");
+            }
 
-            // TODO : Check that the link return something actually.
+            //TODO : Database list domain.
+            $accepted_domains = [
+                "www.mediapart.fr",
+            ];
 
-            // TODO : Check that the domain name is clean.
+            // Extract the domain name.
+            $parsedUrl = parse_url($params->link);
+            if (!isset($parsedUrl['host'])) {
+                return new Result(code: 400, data: "Action failure : unable to extract domain name from the provided URL.");
+            }
 
-            // TODO : Insert the new link.
+            // Check that the domain name exists in our filter.
+            $domainName = $parsedUrl['host'];
+            if (!in_array($domainName, $accepted_domains)) {
+                return new Result(code: 400, data: "Action failure : the domain name is not accepted.");
+            }
+
+            // check that person exists.
+            $person = $this->_localPersonRepository->findUnique($params->personId);
+            if (!isset($person)) {
+                return new Result(code: 400, data: "Action failure : the person does not exists.");
+            }
+
+            // Insert the new message.
+            $this->_localPersonRepository->addLink($params->personId, $params->link);
 
             // Success response.
             return new Result(code: 201, data: "Action success : new entry in message database.");

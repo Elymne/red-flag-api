@@ -25,6 +25,15 @@ class Router implements RouterGateway
                 exit;
             });
 
+            SimpleRouter::get('/test', function () {
+                if ($_ENV["MODE"] == "develop") {
+                }
+
+                http_response_code(404);
+                echo "This route does not exists.";
+                exit;
+            });
+
             // Implements all City routes.
             ZoneRouter::defineRoutes();
 

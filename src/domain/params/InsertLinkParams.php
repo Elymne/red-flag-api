@@ -2,10 +2,12 @@
 
 namespace Domain\Usecases;
 
+use Ramsey\Uuid\UuidInterface;
+
 readonly class InsertLinkParams
 {
     public function __construct(
-        public string $personId,
+        public UuidInterface $personId,
         public string $link,
     ) {}
 }

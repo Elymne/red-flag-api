@@ -14,14 +14,14 @@ class ZoneRouter
 {
     public static function defineRoutes(): void
     {
-        SimpleRouter::group(['prefix' => '/zone'], function () {
+        SimpleRouter::group(['prefix' => '/zones'], function () {
             SimpleRouter::get("/", function () {
                 $name =  $_GET["name"] ?? null;
                 $id =  $_GET["id"] ?? null;
 
                 try {
-                    $remoteCityRepository = new GeoApiDatasource();
-                    $result = $remoteCityRepository->findMany(name: $name, id: $id);
+                    $remoteZoneRepository = new GeoApiDatasource();
+                    $result = $remoteZoneRepository->findMany(name: $name, id: $id);
                     http_response_code(200);
                     echo json_encode($result);
                     exit;

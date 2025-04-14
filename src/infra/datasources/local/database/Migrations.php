@@ -15,8 +15,14 @@ class Migrations
     private static function generateTables(mysqli $mysqli): void
     {
         /** @var string */
-        $query =
-            "CREATE TABLE IF NOT EXISTS zone(
+        $query = "
+            CREATE TABLE IF NOT EXISTS domain(
+                value VARCHAR(250) UNIQUE NOT NULL,
+             
+                CONSTRAINT pk_domain PRIMARY KEY (value)
+            );
+            
+            CREATE TABLE IF NOT EXISTS zone(
                 id VARCHAR(10) UNIQUE NOT NULL,
                 name VARCHAR(250) NOT NULL,
              

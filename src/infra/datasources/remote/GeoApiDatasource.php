@@ -3,9 +3,9 @@
 namespace Infra\Datasources;
 
 use Domain\Models\Zone;
-use Domain\Repositories\RemoteCityRepository;
+use Domain\Repositories\RemoteZoneRepository;
 
-class GeoApiDatasource implements RemoteCityRepository
+class GeoApiDatasource implements RemoteZoneRepository
 {
     public function findMany(string|null $name = null, string|null $id = null): array
     {
