@@ -2,9 +2,11 @@
 
 namespace Infra\Router;
 
-use Infra\Datasources\GeoApiDatasource;
+use Domain\Usecases\FindLocalZones;
+use Domain\Usecases\FindRemoteZones;
+use Domain\Usecases\FindZonesParams;
+use Infra\Di\Container;
 use Pecee\SimpleRouter\SimpleRouter;
-use Throwable;
 
 /**
  * @static
@@ -15,28 +17,30 @@ class ZoneRouter
     public static function defineRoutes(): void
     {
         SimpleRouter::group(['prefix' => '/zones'], function () {
-            SimpleRouter::get("/", function () {
-                $name =  $_GET["name"] ?? null;
-                $id =  $_GET["id"] ?? null;
-
-                try {
-                    $remoteZoneRepository = new GeoApiDatasource();
-                    $result = $remoteZoneRepository->findMany(name: $name, id: $id);
-                    http_response_code(200);
-                    echo json_encode($result);
-                    exit;
-                } catch (Throwable $err) {
-                    http_response_code(500);
-                    echo "Exception : An error occured while fetching zones.\n";
-                    print_r($err);
-                    exit;
-                }
+            SimpleRouter::get("/remote", function () {
+                /** @var FindLocalZones */
+                $findLocalZones = Container::get()->resolve(FindLocalZones::class);
+                $result = $findLocalZones->perform(
+                    new FindZonesParams(
+                        id: $_GET["id"] ?? null,
+                        name: $_GET["name"] ?? null,
+                    )
+                );
+                http_response_code($result->code);
+                echo json_encode($result->data);
+                exit;
             });
 
-            SimpleRouter::get("/{id}", function ($id) {
-                http_response_code(500);
-                echo "Exception : Route not completed.\n";
-                print_r($id);
+            SimpleRouter::get("/local", function () {
+                $findRemoteZones = Container::get()->resolve(FindRemoteZones::class);
+                $result = $findRemoteZones->perform(
+                    new FindZonesParams(
+                        id: $_GET["id"] ?? null,
+                        name: $_GET["name"] ?? null,
+                    )
+                );
+                http_response_code($result->code);
+                echo json_encode($result->data);
                 exit;
             });
         });

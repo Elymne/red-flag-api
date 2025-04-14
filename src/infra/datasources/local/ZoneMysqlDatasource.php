@@ -4,7 +4,6 @@ namespace Infra\Datasources;
 
 use Domain\Models\Zone;
 use Domain\Repositories\LocalZoneRepository;
-use Exception;
 
 class ZoneMysqlDatasource implements LocalZoneRepository
 {
@@ -15,20 +14,22 @@ class ZoneMysqlDatasource implements LocalZoneRepository
         $this->_db = $db;
     }
 
-    public function findMany(string|null $name): array
+    public function findMany(string|null $name, string|null $id = null): array
     {
         // Prapare the statement.
         /** @var string */
         $query = "SELECT id, name FROM city WHERE 1=1";
+        $params = [];
+        if (!is_null($id)) {
+            $query .= " AND id = ?";
+            $params[] = $id;
+        }
         if (!is_null($name)) {
             $query .= " AND first_name = ?";
+            $params[] = $name;
         }
         $stmt = $this->_db->getMysqli()->prepare($query);
         // Inject the value.
-        $params = [];
-        if (!is_null($name)) {
-            $params[] = $name;
-        }
         if (!empty($params)) {
             $stmt->bind_param(str_repeat('s', count($params)), ...$params);
         }

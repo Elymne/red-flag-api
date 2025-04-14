@@ -27,7 +27,7 @@ class FindRemoteZones extends Usecase
                 return new Result(code: 400, data: "Action failure : the data send from body is not correct. Should be a InsertMessageParams structure.");
             }
             // Search remote zone.
-            $zones = $this->_remoteZoneRepository->findMany(name: $params->name);
+            $zones = $this->_remoteZoneRepository->findMany(name: $params->name, id: $params->id);
             if (count($zones) == 0) {
                 return new Result(code: 204, data: null);
             }

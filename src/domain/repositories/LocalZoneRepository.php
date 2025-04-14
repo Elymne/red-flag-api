@@ -13,7 +13,7 @@ interface LocalZoneRepository
      * @param string|null $name
      * @return Zone[]
      */
-    function findMany(string|null $name): array;
+    function findMany(string|null $name, string|null $id = null): array;
 
     /**
      * Find a unique city given the id.

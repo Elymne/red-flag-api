@@ -18,6 +18,7 @@ class PersonRouter
                 $surname = $_GET["surname"];
                 $fullname = $_GET["fullname"];
                 $cities = $_GET["cities"];
+
                 http_response_code(200);
                 echo json_encode("Return many.");
                 exit;

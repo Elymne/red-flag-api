@@ -29,27 +29,21 @@ class PersonMysqlDatasource implements LocalPersonRepository
         // Prapare the statement.
         /** @var string */
         $query = "SELECT HEX(id) as id, first_name, last_name, id_zone, created_at, updated_at, zone.id, zone.name FROM person INNER JOIN zone ON zone.id = id_zone WHERE 1=1";
-        if (!is_null($firstname)) {
-            $query .= " AND first_name = ?";
-        }
-        if (!is_null($lastName)) {
-            $query .= " AND last_name = ?";
-        }
-        if (!is_null($zoneName)) {
-            $query .= " AND zone.name = ?";
-        }
-        $stmt = $this->_db->getMysqli()->prepare($query);
-        // Inject the value.
         $params = [];
         if (!is_null($firstname)) {
+            $query .= " AND first_name = ?";
             $params[] = $firstname;
         }
         if (!is_null($lastName)) {
+            $query .= " AND last_name = ?";
             $params[] = $lastName;
         }
         if (!is_null($zoneName)) {
+            $query .= " AND zone.name = ?";
             $params[] = $zoneName;
         }
+        $stmt = $this->_db->getMysqli()->prepare($query);
+        // Inject the value.
         if (!empty($params)) {
             $stmt->bind_param(str_repeat('s', count($params)), ...$params);
         }
