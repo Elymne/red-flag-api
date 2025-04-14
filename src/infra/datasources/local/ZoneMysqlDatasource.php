@@ -1,0 +1,90 @@
+<?php
+
+namespace Infra\Datasources;
+
+use Domain\Models\Zone;
+use Domain\Repositories\LocalZoneRepository;
+use Exception;
+
+class ZoneMysqlDatasource implements LocalZoneRepository
+{
+    private DBConnect $_db;
+
+    public function __construct(DBConnect $db)
+    {
+        $this->_db = $db;
+    }
+
+    public function findMany(string|null $name): array
+    {
+        // Prapare the statement.
+        /** @var string */
+        $query = "SELECT id, name FROM city WHERE 1=1";
+        if (!is_null($name)) {
+            $query .= " AND first_name = ?";
+        }
+        $stmt = $this->_db->getMysqli()->prepare($query);
+        // Inject the value.
+        $params = [];
+        if (!is_null($name)) {
+            $params[] = $name;
+        }
+        if (!empty($params)) {
+            $stmt->bind_param(str_repeat('s', count($params)), ...$params);
+        }
+        // Run SQL Command and fetch result.
+        $stmt->execute();
+        $result = $stmt->get_result();
+        // Parse raw zones.
+        /** @var City[] */
+        $zones = [];
+        while ($row = $result->fetch_assoc()) {
+            array_push($zones, new Zone(
+                id: $row["id"],
+                name: $row["name"],
+            ));
+        }
+        // Return zones.
+        return $zones;
+    }
+
+    public function findUnique(string $id): Zone|null
+    {
+        // Prepare statement.
+        /** @var string */
+        $query = "SELECT id, name FROM city WHERE id = ?";
+        $stmt = $this->_db->getMysqli()->prepare($query);
+        // Inject values.
+        $stmt->bind_param("s", $id);
+        // Run SQL Command and fetch result.
+        $stmt->execute();
+        $result = $stmt->get_result();
+        // Parse zones.
+        /** @var Zone[] */
+        $zones = [];
+        while ($row = $result->fetch_assoc()) {
+            array_push($zones, new Zone(
+                id: $row["id"],
+                name: $row["name"],
+            ));
+        }
+        // Check if data exists, return null when it's not the case.
+        if (count($zones) == 0) {
+            return null;
+        }
+        //Return the first value.
+        return $zones[0];
+    }
+
+    public function createOne(Zone $zone): void
+    {
+        // Prepare statement.
+        /** @var string */
+        $query = "INSERT INTO city (id, name) VALUES (?, ?)";
+        $stmt = $this->_db->getMysqli()->prepare($query);
+        // Inject values.
+        $stmt->bind_param("ss", $zone->id, $zone->name);
+        // Run SQL Command and fetch result.
+        $stmt->execute();
+    }
+}
