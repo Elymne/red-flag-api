@@ -49,7 +49,10 @@ class Migrations
                 created_at INT(11) NOT NULL,
                 updated_at INT(11),
 
+                id_person BINARY(16) NOT NULL,
+
                 CONSTRAINT pk_link PRIMARY KEY (id)
+                CONSTRAINT fk_link_person FOREIGN KEY (id_person) REFERENCES person(id)
             );
 
             CREATE TABLE IF NOT EXISTS message(
@@ -59,25 +62,10 @@ class Migrations
                 created_at INT(11) NOT NULL,
                 updated_at INT(11),
 
+                id_person BINARY(16) NOT NULL,
+
                 CONSTRAINT pk_message PRIMARY KEY (id)
-            );
-
-            CREATE TABLE IF NOT EXISTS person_link(
-                id_person BINARY(16) UNIQUE NOT NULL,
-                id_link BINARY(16) UNIQUE NOT NULL,
-
-                CONSTRAINT pk_person_link PRIMARY KEY (id_person, id_link)
-                CONSTRAINT fk_person_link_person FOREIGN KEY (id_person) REFERENCES person(id)
-                CONSTRAINT fk_person_link_link FOREIGN KEY (id_link) REFERENCES link(id)
-            );
-
-            CREATE TABLE IF NOT EXISTS person_message(
-                id_person BINARY(16) UNIQUE NOT NULL,
-                id_message BINARY(16) UNIQUE NOT NULL,
-
-                CONSTRAINT pk_person_message PRIMARY KEY (id_person, id_message)
-                CONSTRAINT fk_person_message_person FOREIGN KEY (id_person) REFERENCES person(id)
-                CONSTRAINT fk_person_message_message FOREIGN KEY (id_message) REFERENCES message(id)
+                CONSTRAINT fk_message_person FOREIGN KEY (id_person) REFERENCES person(id)
             );";
 
         $mysqli->multi_query($query);

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Infra\Datasources;
 
 use Domain\Models\Zone;
@@ -14,7 +16,7 @@ class ZoneMysqlDatasource implements LocalZoneRepository
         $this->_db = $db;
     }
 
-    public function findMany(string|null $name, string|null $id = null): array
+    public function findMany(string|null $name = null, string|null $id = null): array
     {
         // Prapare the statement.
         /** @var string */

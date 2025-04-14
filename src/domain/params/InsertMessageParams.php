@@ -2,12 +2,10 @@
 
 namespace Domain\Usecases;
 
-use Ramsey\Uuid\UuidInterface;
-
 readonly class InsertMessageParams
 {
     public function __construct(
-        public UuidInterface $personID,
+        public string $personID,
         public string $message,
     ) {}
 }

@@ -1,15 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Infra\Di;
 
 use Domain\Gateways\DatabaseGateway;
 use Domain\Gateways\RouterGateway;
-use Domain\Models\Zone;
 use Domain\Repositories\LocalDomainRepository;
 use Domain\Repositories\LocalPersonRepository;
 use Domain\Repositories\LocalZoneRepository;
 use Domain\Repositories\RemoteZoneRepository;
-use Domain\Usecases\FindCities;
+use Domain\Repositories\UuidRepository;
 use Domain\Usecases\FindLocalZones;
 use Domain\Usecases\FindRemoteZones;
 use Domain\Usecases\InsertLink;
@@ -17,12 +18,13 @@ use Domain\Usecases\InsertMessage;
 use Domain\Usecases\InsertPerson;
 use Domain\Usecases\Run;
 use Domain\Usecases\RunMigrations;
+use Infra\Uuid\RamseyUuid;
+use Infra\Router\Router;
 use Infra\Datasources\DBConnect;
 use Infra\Datasources\DomainMysqlDatasource;
 use Infra\Datasources\GeoApiDatasource;
 use Infra\Datasources\PersonMysqlDatasource;
 use Infra\Datasources\ZoneMysqlDatasource;
-use Infra\Router\Router;
 
 class BuilderContainer
 {
@@ -54,6 +56,10 @@ class BuilderContainer
      */
     private static function _injectRepositories(Container $container): void
     {
+        $container->add(UuidRepository::class, function () {
+            return new RamseyUuid();
+        });
+
         $container->add(RemoteZoneRepository::class, function () {
             return new GeoApiDatasource();
         });
@@ -93,15 +99,23 @@ class BuilderContainer
         });
 
         $container->add(InsertLink::class, function () use ($container): InsertLink {
-            return new InsertLink($container->resolve(LocalPersonRepository::class));
+            return new InsertLink(
+                $container->resolve(UuidRepository::class),
+                $container->resolve(LocalPersonRepository::class),
+                $container->resolve(LocalDomainRepository::class),
+            );
         });
 
         $container->add(InsertMessage::class, function () use ($container): InsertMessage {
-            return new InsertMessage($container->resolve(LocalPersonRepository::class));
+            return new InsertMessage(
+                $container->resolve(UuidRepository::class),
+                $container->resolve(LocalPersonRepository::class)
+            );
         });
 
         $container->add(InsertPerson::class, function () use ($container): InsertPerson {
             return new InsertPerson(
+                $container->resolve(UuidRepository::class),
                 $container->resolve(DatabaseGateway::class),
                 $container->resolve(RemoteZoneRepository::class),
                 $container->resolve(LocalPersonRepository::class),

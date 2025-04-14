@@ -2,15 +2,12 @@
 
 namespace Domain\Models;
 
-use Ramsey\Uuid\UuidInterface;
-
-readonly class RedFlagLink
+readonly class Link
 {
     public function __construct(
-        public UuidInterface $id,
+        public string $id,
         public string $value,
-
         public int $createdAt,
-        public int $updatedAt,
+        public int|null $updatedAt = null,
     ) {}
 }

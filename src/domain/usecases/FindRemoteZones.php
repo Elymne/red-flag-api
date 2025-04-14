@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Domain\Usecases;
 
 use Core\Result;
@@ -27,10 +29,7 @@ class FindRemoteZones extends Usecase
                 return new Result(code: 400, data: "Action failure : the data send from body is not correct. Should be a InsertMessageParams structure.");
             }
             // Search remote zone.
-            $zones = $this->_remoteZoneRepository->findMany(name: $params->name, id: $params->id);
-            if (count($zones) == 0) {
-                return new Result(code: 204, data: null);
-            }
+            $zones = $this->_remoteZoneRepository->findMany(name: $params->name);
             // Return zones from remotes.
             return new Result(200, $zones);
         } catch (Throwable $err) {

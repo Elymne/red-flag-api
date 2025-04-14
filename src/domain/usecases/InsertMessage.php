@@ -1,18 +1,24 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Domain\Usecases;
 
 use Core\Result;
 use Core\Usecase;
+use Domain\Models\Message;
 use Domain\Repositories\LocalPersonRepository;
+use Domain\Repositories\UuidRepository;
 use Throwable;
 
 class InsertMessage extends Usecase
 {
+    private UuidRepository $_uuidRepository;
     private LocalPersonRepository $_localPersonRepository;
 
-    public function __construct(LocalPersonRepository $localPersonRepository)
+    public function __construct(UuidRepository $uuidRepository, LocalPersonRepository $localPersonRepository)
     {
+        $this->_uuidRepository = $uuidRepository;
         $this->_localPersonRepository = $localPersonRepository;
     }
 
@@ -30,11 +36,15 @@ class InsertMessage extends Usecase
             // check that person exists.
             $person = $this->_localPersonRepository->findUnique($params->personID);
             if (!isset($person)) {
-                return new Result(code: 400, data: "Action failure : the person doesn't exists.");
+                return new Result(code: 400, data: "Action failure : the person does not exists.");
             }
 
             // Insert the new message.
-            $this->_localPersonRepository->addMessage($params->personID, $params->message);
+            $this->_localPersonRepository->addMessage($params->personID, new Message(
+                $this->_uuidRepository->generate(),
+                $params->message,
+                createdAt: time(),
+            ));
 
             // Success response.
             return new Result(code: 201, data: "Action success : new entry in message database.");

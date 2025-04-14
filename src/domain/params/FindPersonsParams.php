@@ -5,9 +5,9 @@ namespace Domain\Usecases;
 readonly class FindPersonsParams
 {
     public function __construct(
-        public string|null $firstname,
-        public string|null $lastname,
-        public string|null $zonename,
-        public string|null $jobname,
+        public string|null $firstname = null,
+        public string|null $lastname = null,
+        public string|null $zonename = null,
+        public string|null $jobname = null,
     ) {}
 }

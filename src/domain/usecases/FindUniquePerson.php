@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Domain\Usecases;
 
 use Core\Result;
@@ -24,7 +26,7 @@ class FindUniquePerson extends Usecase
         try {
             // Check $params type.
             if (!isset($params) || !($params instanceof FindUniquePersonParams)) {
-                return new Result(code: 400, data: "Action failure : the data send from body is not correct. Should be a FindPersonsParams structure.");
+                return new Result(code: 400, data: "Action failure : the data send from body is not correct. Should be a FindUniquePersonParams structure.");
             }
             // Search persons corresponding to theses.
             $person = $this->_localPersonRepository->findUnique($params->id);

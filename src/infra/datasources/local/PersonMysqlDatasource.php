@@ -1,16 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Infra\Datasources;
 
 use Domain\Models\Person;
 use Domain\Models\PersonDetailed;
-use Domain\Models\RedFlagLink;
-use Domain\Models\RedFlagMessage;
+use Domain\Models\Link;
+use Domain\Models\Message;
 use Domain\Models\Zone;
 use Domain\Repositories\LocalPersonRepository;
 use Ramsey\Uuid\Uuid;
-use Ramsey\Uuid\UuidInterface;
-use Exception;
 
 class PersonMysqlDatasource implements LocalPersonRepository
 {
@@ -55,7 +55,7 @@ class PersonMysqlDatasource implements LocalPersonRepository
         $persons = [];
         while ($row = $result->fetch_assoc()) {
             array_push($persons, new Person(
-                id: Uuid::fromString($row["id"]),
+                id: $row["id"],
                 firstName: $row["first_name"],
                 lastName: $row["last_name"],
 
@@ -71,59 +71,54 @@ class PersonMysqlDatasource implements LocalPersonRepository
         return $persons;
     }
 
-    /**
-     * @param UuidInterface $id
-     */
-    public function findUnique(UuidInterface $id): PersonDetailed|null
+    public function findUnique(string $id): PersonDetailed|null
     {
+        // Generate bytes from UUID for Mysql version used.
+        $uuid = Uuid::fromString($id)->getBytes();
         // Prapare the statement for link data.
         $query =
-            "SELECT HEX(id_person) as id_person, HEX(id_link) as id_link, l.value, l.created_at, l.updated_at 
-            FROM person_link
-            INNER JOIN link as l ON l.id = id_link 
+            "SELECT HEX(id_person) as id_person, HEX(id) as id, l.value, l.created_at, l.updated_at 
+            FROM link
             WHERE id_person = ?";
         $stmt = $this->_db->getMysqli()->prepare($query);
         // Inject the value.
-        $stmt->bind_param("s", $id->getBytes());
+        $stmt->bind_param("s", $uuid);
         // Run SQL Command and fetch result.
         $stmt->execute();
         $linksResult = $stmt->get_result();
         // Parse links.
-        /** @var RedFlagLink[] */
+        /** @var Link[] */
         $links = [];
         while ($row = $linksResult->fetch_assoc()) {
-            array_push($links, new RedFlagLink(
-                id: Uuid::fromString($row["id_link"]),
+            array_push($links, new Link(
+                id: $row["id"],
                 value: $row["l.value"],
                 createdAt: $row["l.created_at"],
                 updatedAt: $row["l.updated_at"],
             ));
         }
-
         // Prapare the statement for message data.
         $query =
-            "SELECT HEX(id_person) as id_person, HEX(id_message) as id_message, m.value, m.created_at, m.updated_at 
-            FROM person_message
-            INNER JOIN message as m ON m.id = id_message
+            "SELECT HEX(id_person) as id_person, HEX(id) as id, m.value, m.created_at, m.updated_at 
+            FROM message
             WHERE id_person = ?";
         $stmt = $this->_db->getMysqli()->prepare($query);
         // Inject the value.
-        $stmt->bind_param("s", [$id->getBytes()]);
+        $stmt->bind_param("s", [$uuid]);
         // Run SQL Command and fetch result.
         $stmt->execute();
         $messagesResult = $stmt->get_result();
         // Parse messages.
-        /** @var RedFlagMessage[] */
+        /** @var Message[] */
         $messages = [];
         while ($row = $messagesResult->fetch_assoc()) {
-            array_push($messages, new RedFlagMessage(
-                id: Uuid::fromString($row["id_message"]),
+            array_push($messages, new Message(
+                id: $row["id"],
                 value: $row["m.value"],
                 createdAt: $row["m.created_at"],
                 updatedAt: $row["m.updated_at"],
             ));
         }
-
         // Prapare the statement for person data.
         /** @var string */
         $query =
@@ -133,7 +128,7 @@ class PersonMysqlDatasource implements LocalPersonRepository
             WHERE id = ?";
         $stmt = $this->_db->getMysqli()->prepare($query);
         // Inject the value.
-        $stmt->bind_param("s", [$id->getBytes()]);
+        $stmt->bind_param("s", [$uuid]);
         // Run SQL Command and fetch result.
         $stmt->execute();
         $PersonsResult = $stmt->get_result();
@@ -142,7 +137,7 @@ class PersonMysqlDatasource implements LocalPersonRepository
         $persons = [];
         while ($row = $PersonsResult->fetch_assoc()) {
             array_push($persons, new PersonDetailed(
-                id: Uuid::fromString($row["id"]),
+                id: $row["id"],
                 firstName: $row["first_name"],
                 lastName: $row["last_name"],
 
@@ -174,38 +169,36 @@ class PersonMysqlDatasource implements LocalPersonRepository
         $query = "INSERT INTO person (id, first_name, last_name, created_at, updated_at, id_zone) VALUES (?, ?, ?, ?, ?, ?)";
         $stmt = $this->_db->getMysqli()->prepare($query);
         // Inject values.
-        $stmt->bind_param("isssss", $person->id->getBytes(), $person->firstName, $person->lastName, $person->createdAt, $person->updatedAt, $person->zone->id);
+        $uuid = Uuid::fromString($person->id)->getBytes();
+        $stmt->bind_param("issiis", $uuid, $person->firstName, $person->lastName, $person->createdAt, $person->updatedAt, $person->zone->id);
         // Run SQL Command and fetch result.
         $stmt->execute();
     }
 
-    /**
-     * @param UuidInterface $id
-     */
-    function addMessage(UuidInterface $id, string $value): void
+    function addMessage(string $id, Message $message): void
     {
         // Prepare statement for person.
         /** @var string */
-        $query = "INSERT INTO message (id, value) VALUES (?, ?)";
+        $query = "INSERT INTO message (id, value, id_person, created_at, updated_at) VALUES (?, ?, ?, ?, ?)";
         $stmt = $this->_db->getMysqli()->prepare($query);
         // Inject values.
-        $stmt->bind_param("is", $id->getBytes(), $value);
+        $person_id = Uuid::fromString($id)->getBytes();
+        $message_id = Uuid::fromString($message->id)->getBytes();
+        $stmt->bind_param("issii", [$message_id, $message->value, $person_id, $message->createdAt, $message->updatedAt]);
         // Run SQL Command and fetch result.
         $stmt->execute();
     }
 
-
-    /**
-     * @param UuidInterface $id
-     */
-    function addLink(UuidInterface $id, string $value): void
+    function addLink(string $id, Link $link): void
     {
         // Prepare statement for person.
         /** @var string */
         $query = "INSERT INTO link (id, value) VALUES (?, ?)";
         $stmt = $this->_db->getMysqli()->prepare($query);
         // Inject values.
-        $stmt->bind_param("is", $id->getBytes(), $value);
+        $person_id = Uuid::fromString($id)->getBytes();
+        $link_id = Uuid::fromString($link->id)->getBytes();
+        $stmt->bind_param("issii", [$link_id, $link->value, $person_id, $link->createdAt, $link->updatedAt]);
         // Run SQL Command and fetch result.
         $stmt->execute();
     }

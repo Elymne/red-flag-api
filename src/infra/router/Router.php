@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Infra\Router;
 
 use Core\Result;
@@ -14,7 +16,7 @@ class Router implements RouterGateway
     {
         // Group all routes to trigger my middleware and catch errors.
         SimpleRouter::group([
-            "middleware" => AuthMiddleware::class,
+            "middleware" => CustomMiddleware::class,
             "exceptionHandler" => ExceptionHandler::class,
         ], function () {
             // Route : /
