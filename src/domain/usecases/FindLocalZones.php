@@ -7,7 +7,7 @@ use Core\Usecase;
 use Domain\Repositories\LocalZoneRepository;
 use Throwable;
 
-class FindRemoteZones extends Usecase
+class FindLocalZones extends Usecase
 {
     private LocalZoneRepository $_localZoneRepository;
 
