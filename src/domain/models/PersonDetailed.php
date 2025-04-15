@@ -2,23 +2,21 @@
 
 namespace Domain\Models;
 
-readonly class PersonDetailed
+readonly class PersonDetailed extends Person
 {
-    /**
-     * @param RedFlagMessage[] $messages
-     * @param RedFlagLink[] $links
-     * @param City[] $cities
-     */
     public function __construct(
-        public string $id,
-        public string $first_name,
-        public string $last_name,
+        string $id,
+        string $firstName,
+        string $lastName,
+        string $jobName,
+        Zone $zone,
+        int $createdAt,
 
         public array $messages,
         public array $links,
-        public array $cities,
 
-        public int $created_at,
-        public int $updated_at,
-    ) {}
+        int|null $updatedAt = null,
+    ) {
+        parent::__construct($id, $firstName, $lastName, $jobName, $zone, $createdAt, $updatedAt);
+    }
 }

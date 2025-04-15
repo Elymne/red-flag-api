@@ -2,11 +2,7 @@
 
 namespace Domain\Models;
 
-/**
- * Can be an article, Youtube video.
- * All theses links shoudl be certified from safe sources.
- */
-readonly class City
+readonly class Zone
 {
     public function __construct(
         public string $id, // The code from the api I use.

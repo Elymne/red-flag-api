@@ -2,16 +2,16 @@
 
 namespace Domain\Repositories;
 
-use Domain\Models\City;
+use Domain\Models\Zone;
 
-interface RemoteCityRepository
+interface RemoteZoneRepository
 {
     /**
      * Fetch the list of cities that can correspond to the name or the id.
      * 
      * @param string|null $name
      * @param string|null $id
-     * @return City[] - List of cities
+     * @return Zone[] - List of cities
      */
     function findMany(string|null $name = null, string|null $id = null): array;
 
@@ -19,7 +19,7 @@ interface RemoteCityRepository
      * Fetch the unique city given the code (id).
      * 
      * @param string $id
-     * @return City|null - The unique city
+     * @return Zone|null - The unique city
      */
-    function findUnique(string $id): City|null;
+    function findUnique(string $id): Zone|null;
 }

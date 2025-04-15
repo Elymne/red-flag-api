@@ -1,16 +1,22 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Infra\Router;
 
+use Core\Result;
+use Domain\Gateways\RouterGateway;
+use Domain\Usecases\RunMigrations;
+use Infra\Di\Container;
 use Pecee\SimpleRouter\SimpleRouter;
 
-class Router
+class Router implements RouterGateway
 {
-    public static function start(): void
+    public function start(): void
     {
         // Group all routes to trigger my middleware and catch errors.
         SimpleRouter::group([
-            "middleware" => AuthMiddleware::class,
+            "middleware" => CustomMiddleware::class,
             "exceptionHandler" => ExceptionHandler::class,
         ], function () {
             // Route : /
@@ -21,11 +27,34 @@ class Router
                 exit;
             });
 
+            SimpleRouter::get('/test', function () {
+                if ($_ENV["MODE"] == "develop") {
+                }
+
+                http_response_code(404);
+                echo "This route does not exists.";
+                exit;
+            });
+
             // Implements all City routes.
-            CityRouter::defineRoutes();
+            ZoneRouter::defineRoutes();
 
             // Implements all Persons routes.
             PersonRouter::defineRoutes();
+        });
+
+        SimpleRouter::get('/migrations', function () {
+            if ($_ENV["MODE"] == "develop") {
+                /** @var Result */
+                $result = Container::get()->resolve(RunMigrations::class)->perform();
+                http_response_code($result->code);
+                echo json_encode($result->data);
+                exit;
+            }
+
+            http_response_code(404);
+            echo "This route does not exists.";
+            exit;
         });
 
         // Start the routing

@@ -9,20 +9,48 @@
     ],
     "autoload": {
         "psr-4": {
-            "Core\\": "src/core",
-            "Domain\\Models\\": "src/domain/models",
-            "Domain\\Repositories\\": "src/domain/repositories",
-            "Domain\\Usecases\\": "src/domain/usecases",
+            "Core\\": [
+                "src/core"
+            ],
+            "Domain\\Models\\": [
+                "src/domain/models"
+            ],
+            "Domain\\Repositories\\": [
+                "src/domain/repositories"
+            ],
+            "Domain\\Gateways\\": [
+                "src/domain/gateways"
+            ],
+            "Domain\\Usecases\\": [
+                "src/domain/usecases",
+                "src/domain/params"
+            ],
             "Infra\\Router\\": [
                 "src/infra/router",
                 "src/infra/router/handlers"
             ],
-            "Infra\\Datasources\\": "src/infra/datasources",
-            "Infra\\DI\\": "src/infra/di"
+            "Infra\\Datasources\\": [
+                "src/infra/datasources/local",
+                "src/infra/datasources/local/database",
+                "src/infra/datasources/remote"
+            ],
+            "Infra\\Di\\": [
+                "src/infra/di"
+            ],
+            "Infra\\Env\\": [
+                "src/infra/env"
+            ],
+            "Infra\\Uuid\\": [
+                "src/infra/uuid"
+            ]
         }
     },
     "require": {
         "ramsey/uuid": "^4.7",
         "pecee/simple-router": "*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "12",
+        "mockery/mockery": "^1.6"
     }
 }

@@ -7,3 +7,6 @@ Run php server with :
 
 To kill process :
     fuser -k 8000/tcp
+
+Run tests :
+    ./vendor/bin/phpunit tests --display-deprecations

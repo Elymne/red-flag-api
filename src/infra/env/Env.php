@@ -1,0 +1,21 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Infra\Env;
+
+class Env
+{
+    public static function load(): void
+    {
+        $lines = file(".env");
+        foreach ($lines as $line) {
+            [$key, $value] = explode("=", $line, 2);
+            $key = trim($key);
+            $value = trim($value);
+            putenv(sprintf("%s=%s", $key, $value));
+            $_ENV[$key] = $value;
+            $_SERVER[$key] = $value;
+        }
+    }
+}

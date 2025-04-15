@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Infra\Datasources;
 
-use Domain\Models\City;
-use Domain\Repositories\RemoteCityRepository;
+use Domain\Models\Zone;
+use Domain\Repositories\RemoteZoneRepository;
 
-class GeoApiDatasource implements RemoteCityRepository
+class GeoApiDatasource implements RemoteZoneRepository
 {
     public function findMany(string|null $name = null, string|null $id = null): array
     {
@@ -26,7 +28,7 @@ class GeoApiDatasource implements RemoteCityRepository
         $result = [];
         for ($i = 0; $i < 100 && $i < count($rawCities); $i++) {
             $rawCity = $rawCities[$i];
-            array_push($result, new City(
+            array_push($result, new Zone(
                 id: $rawCity["code"],
                 name: $rawCity["nom"]
             ));
@@ -35,7 +37,7 @@ class GeoApiDatasource implements RemoteCityRepository
         return $result;
     }
 
-    public function findUnique(string $id): City|null
+    public function findUnique(string $id): Zone|null
     {
         $url = "https://geo.api.gouv.fr/communes/" . $id;
 
@@ -49,7 +51,7 @@ class GeoApiDatasource implements RemoteCityRepository
         $response = file_get_contents(filename: $url, context: $context);
         $rawCity = json_decode($response, true);
 
-        return new City(
+        return new Zone(
             id: $rawCity["code"],
             name: $rawCity["nom"]
         );
