@@ -8,6 +8,7 @@ readonly class PersonDetailed extends Person
         string $id,
         string $firstName,
         string $lastName,
+        string $jobName,
         Zone $zone,
         int $createdAt,
 
@@ -16,6 +17,6 @@ readonly class PersonDetailed extends Person
 
         int|null $updatedAt = null,
     ) {
-        parent::__construct($id, $firstName, $lastName, $zone, $createdAt, $updatedAt);
+        parent::__construct($id, $firstName, $lastName, $jobName, $zone, $createdAt, $updatedAt);
     }
 }

@@ -65,6 +65,7 @@ class InsertPerson extends Usecase
             $usersBeLike = $this->_localPersonRepository->findMany(
                 firstname: $params->firstname,
                 lastname: $params->lastname,
+                jobname: $params->jobname,
                 zonename: $zone->name
             );
             if (count($usersBeLike) != 0) {
@@ -77,6 +78,7 @@ class InsertPerson extends Usecase
                     id: $this->_uuidRepository->generate(),
                     firstName: $params->firstname,
                     lastName: $params->lastname,
+                    jobName: $params->jobname,
                     createdAt: time(),
                     updatedAt: null,
                     zone: $zone

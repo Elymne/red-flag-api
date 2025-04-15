@@ -43,6 +43,7 @@ class FindUniquePersonTest extends TestCase
             id: $uuid,
             firstName: "f",
             lastName: "l",
+            jobName: "t",
             zone: new Zone(id: "01", name: "c"),
             createdAt: 0,
             messages: [],

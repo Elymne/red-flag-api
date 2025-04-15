@@ -33,6 +33,8 @@ class Migrations
                 id BINARY(16) UNIQUE NOT NULL,
                 first_name VARCHAR(250) NOT NULL,
                 last_name VARCHAR(250) NOT NULL,
+                job_name VARCHAR(250) NOT NULL,
+                
                 id_zone VARCHAR(250) NOT NULL,
 
                 created_at INT(11) NOT NULL,

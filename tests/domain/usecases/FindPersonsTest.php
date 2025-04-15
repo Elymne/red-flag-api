@@ -25,7 +25,7 @@ class FindPersonsTest extends TestCase
 
     public function test_findEmpty(): void
     {
-        $this->_localPersonRepository->allows()->findMany("Someone", null, null)->andReturns([]);
+        $this->_localPersonRepository->allows()->findMany("Someone", null, null, null)->andReturns([]);
         $findPersons = new FindPersons($this->_localPersonRepository);
 
         $result = $findPersons->perform(new FindPersonsParams(firstname: "Someone"));
@@ -37,13 +37,13 @@ class FindPersonsTest extends TestCase
     public function test_findMany(): void
     {
         $data = [
-            new Person(id: "01", firstName: "a", lastName: "j", zone: new Zone(id: "01", name: "Somewhere"), createdAt: 0),
-            new Person(id: "02", firstName: "a", lastName: "j", zone: new Zone(id: "01", name: "Somewhere"), createdAt: 0),
-            new Person(id: "03", firstName: "a", lastName: "j", zone: new Zone(id: "01", name: "Somewhere"), createdAt: 0),
-            new Person(id: "04", firstName: "a", lastName: "j", zone: new Zone(id: "01", name: "Somewhere"), createdAt: 0),
+            new Person(id: "01", firstName: "a", lastName: "j", jobName: "t", zone: new Zone(id: "01", name: "Somewhere"), createdAt: 0),
+            new Person(id: "02", firstName: "a", lastName: "j", jobName: "t", zone: new Zone(id: "01", name: "Somewhere"), createdAt: 0),
+            new Person(id: "03", firstName: "a", lastName: "j", jobName: "t", zone: new Zone(id: "01", name: "Somewhere"), createdAt: 0),
+            new Person(id: "04", firstName: "a", lastName: "j", jobName: "t", zone: new Zone(id: "01", name: "Somewhere"), createdAt: 0),
         ];
 
-        $this->_localPersonRepository->allows()->findMany("anyone", null, null)->andReturns($data);
+        $this->_localPersonRepository->allows()->findMany("anyone", null, null, null)->andReturns($data);
         $findPersons = new FindPersons($this->_localPersonRepository);
 
         $result = $findPersons->perform(new FindPersonsParams(firstname: "anyone"));
@@ -54,7 +54,7 @@ class FindPersonsTest extends TestCase
 
     public function test_noParams(): void
     {
-        $this->_localPersonRepository->allows()->findMany(null, null, null)->andReturns([]);
+        $this->_localPersonRepository->allows()->findMany(null, null, null, null)->andReturns([]);
         $findPersons = new FindPersons($this->_localPersonRepository);
 
         $result = $findPersons->perform(new FindPersonsParams());
@@ -66,13 +66,13 @@ class FindPersonsTest extends TestCase
     public function test_wrongParams(): void
     {
         $data = [
-            new Person(id: "01", firstName: "a", lastName: "j", zone: new Zone(id: "01", name: "Somewhere"), createdAt: 0),
-            new Person(id: "02", firstName: "a", lastName: "j", zone: new Zone(id: "01", name: "Somewhere"), createdAt: 0),
-            new Person(id: "03", firstName: "a", lastName: "j", zone: new Zone(id: "01", name: "Somewhere"), createdAt: 0),
-            new Person(id: "04", firstName: "a", lastName: "j", zone: new Zone(id: "01", name: "Somewhere"), createdAt: 0),
+            new Person(id: "01", firstName: "a", lastName: "j", jobName: "t", zone: new Zone(id: "01", name: "Somewhere"), createdAt: 0),
+            new Person(id: "02", firstName: "a", lastName: "j", jobName: "t", zone: new Zone(id: "01", name: "Somewhere"), createdAt: 0),
+            new Person(id: "03", firstName: "a", lastName: "j", jobName: "t", zone: new Zone(id: "01", name: "Somewhere"), createdAt: 0),
+            new Person(id: "04", firstName: "a", lastName: "j", jobName: "t", zone: new Zone(id: "01", name: "Somewhere"), createdAt: 0),
         ];
 
-        $this->_localPersonRepository->allows()->findMany(null, null, null)->andReturns($data);
+        $this->_localPersonRepository->allows()->findMany(null, null, null, null)->andReturns($data);
         $findPersons = new FindPersons($this->_localPersonRepository);
 
         $result = $findPersons->perform("Wrong params");
@@ -83,7 +83,7 @@ class FindPersonsTest extends TestCase
 
     public function test_Exception(): void
     {
-        $this->_localPersonRepository->allows()->findMany(null, null, null)->andThrow(new \Exception("Repository exception"));
+        $this->_localPersonRepository->allows()->findMany(null, null, null, null)->andThrow(new \Exception("Repository exception"));
         $findPersons = new FindPersons($this->_localPersonRepository);
 
         $result = $findPersons->perform(new FindPersonsParams(firstname: "Someone"));

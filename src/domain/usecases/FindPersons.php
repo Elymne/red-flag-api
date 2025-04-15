@@ -32,6 +32,7 @@ class FindPersons extends Usecase
             $persons = $this->_localPersonRepository->findMany(
                 firstname: $params->firstname,
                 lastname: $params->lastname,
+                jobname: $params->jobname,
                 zonename: $params->zonename,
             );
             // Return persons from remotes.

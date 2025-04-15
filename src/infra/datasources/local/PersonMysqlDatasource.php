@@ -24,11 +24,12 @@ class PersonMysqlDatasource implements LocalPersonRepository
     public function findMany(
         string|null $firstname = null,
         string|null $lastName = null,
+        string|null $jobname = null,
         string|null $zoneName = null
     ): array {
         // Prapare the statement.
         /** @var string */
-        $query = "SELECT HEX(id) as id, first_name, last_name, id_zone, created_at, updated_at, zone.id, zone.name FROM person INNER JOIN zone ON zone.id = id_zone WHERE 1=1";
+        $query = "SELECT HEX(id) as id, first_name, last_name, job_name, id_zone, created_at, updated_at, zone.id, zone.name FROM person INNER JOIN zone ON zone.id = id_zone WHERE 1=1";
         $params = [];
         if (!is_null($firstname)) {
             $query .= " AND first_name = ?";
@@ -37,6 +38,10 @@ class PersonMysqlDatasource implements LocalPersonRepository
         if (!is_null($lastName)) {
             $query .= " AND last_name = ?";
             $params[] = $lastName;
+        }
+        if (!is_null($jobname)) {
+            $query .= " AND job_name = ?";
+            $params[] = $jobname;
         }
         if (!is_null($zoneName)) {
             $query .= " AND zone.name = ?";
@@ -58,6 +63,7 @@ class PersonMysqlDatasource implements LocalPersonRepository
                 id: $row["id"],
                 firstName: $row["first_name"],
                 lastName: $row["last_name"],
+                jobName: $row["job_name"],
 
                 zone: new Zone(
                     id: $row["zone.id"],
@@ -122,7 +128,7 @@ class PersonMysqlDatasource implements LocalPersonRepository
         // Prapare the statement for person data.
         /** @var string */
         $query =
-            "SELECT HEX(id) as id, first_name, last_name, id_zone, created_at, updated_at, zone.id, zone.name 
+            "SELECT HEX(id) as id, first_name, last_name, job_name, id_zone, created_at, updated_at, zone.id, zone.name 
             FROM person 
             INNER JOIN zone ON zone.id = id_zone 
             WHERE id = ?";
@@ -140,6 +146,7 @@ class PersonMysqlDatasource implements LocalPersonRepository
                 id: $row["id"],
                 firstName: $row["first_name"],
                 lastName: $row["last_name"],
+                jobName: $row["job_name"],
 
                 zone: new Zone(
                     id: $row["zone.id"],
@@ -166,11 +173,11 @@ class PersonMysqlDatasource implements LocalPersonRepository
     {
         // Prepare statement for person.
         /** @var string */
-        $query = "INSERT INTO person (id, first_name, last_name, created_at, updated_at, id_zone) VALUES (?, ?, ?, ?, ?, ?)";
+        $query = "INSERT INTO person (id, first_name, last_name, job_name, created_at, updated_at, id_zone) VALUES (?, ?, ?, ?, ?, ?, ?)";
         $stmt = $this->_db->getMysqli()->prepare($query);
         // Inject values.
         $uuid = Uuid::fromString($person->id)->getBytes();
-        $stmt->bind_param("issiis", $uuid, $person->firstName, $person->lastName, $person->createdAt, $person->updatedAt, $person->zone->id);
+        $stmt->bind_param("issiis", [$uuid, $person->firstName, $person->lastName, $person->jobName, $person->createdAt, $person->updatedAt, $person->zone->id]);
         // Run SQL Command and fetch result.
         $stmt->execute();
     }

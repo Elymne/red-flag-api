@@ -52,6 +52,7 @@ class InsertPersonTest extends TestCase
         $params = new InsertPersonParams(
             firstname: "f",
             lastname: "l",
+            jobname: "t",
             zoneID: $zoneID
         );
 
@@ -81,6 +82,7 @@ class InsertPersonTest extends TestCase
             id: $personID,
             firstName: "f",
             lastName: "l",
+            jobName: "t",
             zone: $zone,
             createdAt: 0,
         );
@@ -88,6 +90,7 @@ class InsertPersonTest extends TestCase
         $params = new InsertPersonParams(
             firstname: $person->firstName,
             lastname: $person->lastName,
+            jobname: $person->jobName,
             zoneID: $zoneID,
         );
 
@@ -95,7 +98,7 @@ class InsertPersonTest extends TestCase
         $this->_db->allows()->getMysqli()->andReturns($this->_mysqli);
 
         $this->_localZoneRepository->allows()->findUnique($zoneID)->andReturns($zone);
-        $this->_localPersonRepository->allows()->findMany($params->firstname, $params->lastname, $zone->name)->andReturns([$person, $person]);
+        $this->_localPersonRepository->allows()->findMany($params->firstname, $params->lastname, $person->jobName, $zone->name)->andReturns([$person, $person]);
 
         $insertPerson = new InsertPerson($this->_uuidRepository, $this->_db, $this->_remoteZoneRepository, $this->_localPersonRepository, $this->_localZoneRepository);
         $result = $insertPerson->perform($params);
@@ -117,6 +120,7 @@ class InsertPersonTest extends TestCase
             id: $personID,
             firstName: "f",
             lastName: "l",
+            jobName: "t",
             zone: $zone,
             createdAt: 0,
         );
@@ -124,6 +128,7 @@ class InsertPersonTest extends TestCase
         $params = new InsertPersonParams(
             firstname: $person->firstName,
             lastname: $person->lastName,
+            jobname: $person->jobName,
             zoneID: $zoneID,
         );
 
@@ -133,7 +138,7 @@ class InsertPersonTest extends TestCase
 
         $this->_localZoneRepository->allows()->findUnique($zoneID)->andReturns(null);
         $this->_remoteZoneRepository->allows()->findUnique($zoneID)->andReturns($zone);
-        $this->_localPersonRepository->allows()->findMany($person->firstName, $person->lastName, $zone->name)->andReturns([]);
+        $this->_localPersonRepository->allows()->findMany($person->firstName, $person->lastName, $person->jobName, $zone->name)->andReturns([]);
 
         // Here, arg is relative to time, it mean when cannot predict this value.
         $this->_localZoneRepository->shouldReceive("createOne")->andReturns(null);
@@ -163,6 +168,7 @@ class InsertPersonTest extends TestCase
             id: $personID,
             firstName: "f",
             lastName: "l",
+            jobName: "t",
             zone: $zone,
             createdAt: 0,
         );
@@ -170,6 +176,7 @@ class InsertPersonTest extends TestCase
         $params = new InsertPersonParams(
             firstname: $person->firstName,
             lastname: $person->lastName,
+            jobname: $person->jobName,
             zoneID: $zone->id,
         );
 
@@ -178,7 +185,7 @@ class InsertPersonTest extends TestCase
         $this->_db->allows()->getMysqli()->andReturns($this->_mysqli);
 
         $this->_localZoneRepository->allows()->findUnique($zoneID)->andReturns($zone);
-        $this->_localPersonRepository->allows()->findMany($params->firstname, $params->lastname, $zone->name)->andReturns([]);
+        $this->_localPersonRepository->allows()->findMany($params->firstname, $params->lastname, $person->jobName, $zone->name)->andReturns([]);
         $this->_uuidRepository->allows()->generate()->andReturns($zoneID);
         // Here, arg is relative to time, it mean when cannot predict this value.
         $this->_localPersonRepository->shouldReceive("createOne")->andReturns(null);
@@ -195,6 +202,7 @@ class InsertPersonTest extends TestCase
         $params = new InsertPersonParams(
             firstname: "f",
             lastname: "l",
+            jobname: "t",
             zoneID: "01",
         );
 
