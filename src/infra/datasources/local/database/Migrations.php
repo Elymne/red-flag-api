@@ -53,7 +53,7 @@ class Migrations
 
                 id_person BINARY(16) NOT NULL,
 
-                CONSTRAINT pk_link PRIMARY KEY (id)
+                CONSTRAINT pk_link PRIMARY KEY (id),
                 CONSTRAINT fk_link_person FOREIGN KEY (id_person) REFERENCES person(id)
             );
 
@@ -66,7 +66,7 @@ class Migrations
 
                 id_person BINARY(16) NOT NULL,
 
-                CONSTRAINT pk_message PRIMARY KEY (id)
+                CONSTRAINT pk_message PRIMARY KEY (id),
                 CONSTRAINT fk_message_person FOREIGN KEY (id_person) REFERENCES person(id)
             );";
 

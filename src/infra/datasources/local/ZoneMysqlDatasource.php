@@ -20,14 +20,14 @@ class ZoneMysqlDatasource implements LocalZoneRepository
     {
         // Prapare the statement.
         /** @var string */
-        $query = "SELECT id, name FROM city WHERE 1=1";
+        $query = "SELECT id, name FROM zone WHERE 1=1";
         $params = [];
         if (!is_null($id)) {
             $query .= " AND id = ?";
             $params[] = $id;
         }
         if (!is_null($name)) {
-            $query .= " AND first_name = ?";
+            $query .= " AND name = ?";
             $params[] = $name;
         }
         $stmt = $this->_db->getMysqli()->prepare($query);
@@ -39,7 +39,7 @@ class ZoneMysqlDatasource implements LocalZoneRepository
         $stmt->execute();
         $result = $stmt->get_result();
         // Parse raw zones.
-        /** @var City[] */
+        /** @var Zone[] */
         $zones = [];
         while ($row = $result->fetch_assoc()) {
             array_push($zones, new Zone(
@@ -55,7 +55,7 @@ class ZoneMysqlDatasource implements LocalZoneRepository
     {
         // Prepare statement.
         /** @var string */
-        $query = "SELECT id, name FROM city WHERE id = ?";
+        $query = "SELECT id, name FROM zone WHERE id = ?";
         $stmt = $this->_db->getMysqli()->prepare($query);
         // Inject values.
         $stmt->bind_param("s", $id);
@@ -83,7 +83,7 @@ class ZoneMysqlDatasource implements LocalZoneRepository
     {
         // Prepare statement.
         /** @var string */
-        $query = "INSERT INTO city (id, name) VALUES (?, ?)";
+        $query = "INSERT INTO zone (id, name) VALUES (?, ?)";
         $stmt = $this->_db->getMysqli()->prepare($query);
         // Inject values.
         $stmt->bind_param("ss", $zone->id, $zone->name);

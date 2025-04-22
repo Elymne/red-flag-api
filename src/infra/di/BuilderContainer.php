@@ -12,7 +12,9 @@ use Domain\Repositories\LocalZoneRepository;
 use Domain\Repositories\RemoteZoneRepository;
 use Domain\Repositories\UuidRepository;
 use Domain\Usecases\FindLocalZones;
+use Domain\Usecases\FindPersons;
 use Domain\Usecases\FindRemoteZones;
+use Domain\Usecases\FindUniquePerson;
 use Domain\Usecases\InsertLink;
 use Domain\Usecases\InsertMessage;
 use Domain\Usecases\InsertPerson;
@@ -96,6 +98,14 @@ class BuilderContainer
 
         $container->add(FindRemoteZones::class, function () use ($container): FindRemoteZones {
             return new FindRemoteZones($container->resolve(RemoteZoneRepository::class));
+        });
+
+        $container->add(FindPersons::class, function () use ($container): FindPersons {
+            return new FindPersons($container->resolve(LocalPersonRepository::class));
+        });
+
+        $container->add(FindUniquePerson::class, function () use ($container): FindUniquePerson {
+            return new FindUniquePerson($container->resolve(LocalPersonRepository::class));
         });
 
         $container->add(InsertLink::class, function () use ($container): InsertLink {

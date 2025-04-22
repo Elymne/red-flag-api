@@ -16,7 +16,7 @@ interface LocalZoneRepository
     function findMany(string|null $name = null, string|null $id = null): array;
 
     /**
-     * Find a unique city given the id.
+     * Find a unique zone given the id.
      *  
      * @param string $id
      * @return Zone
@@ -24,11 +24,11 @@ interface LocalZoneRepository
     function findUnique(string $id): Zone|null;
 
     /**
-     * Insert a new city to database.
+     * Insert a new zone to database.
      *  
-     * @param Zone $city
-     * The id is not generated from server. The id is just the "code commune" of the city.
+     * @param Zone $zone
+     * The id is not generated from server. The id is just the "code commune" of the zone.
      * @return Zone Inserted Zone data.
      */
-    function createOne(Zone $city): void;
+    function createOne(Zone $zone): void;
 }

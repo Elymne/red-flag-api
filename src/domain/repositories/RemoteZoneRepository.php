@@ -16,10 +16,10 @@ interface RemoteZoneRepository
     function findMany(string|null $name = null, string|null $id = null): array;
 
     /**
-     * Fetch the unique city given the code (id).
+     * Fetch the unique zone given the code (id).
      * 
      * @param string $id
-     * @return Zone|null - The unique city
+     * @return Zone|null - The unique zone
      */
     function findUnique(string $id): Zone|null;
 }

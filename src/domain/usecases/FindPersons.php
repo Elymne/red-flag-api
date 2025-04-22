@@ -38,6 +38,7 @@ class FindPersons extends Usecase
             // Return persons from remotes.
             return new Result(200, $persons);
         } catch (Throwable $err) {
+            echo $err;
             return new Result(code: 500, data: "Action failure : Internal Server Error.");
         }
     }

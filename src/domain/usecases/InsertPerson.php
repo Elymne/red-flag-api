@@ -50,7 +50,7 @@ class InsertPerson extends Usecase
             // Start transaction
             $this->_db->getMysqli()->begin_transaction();
 
-            // Check if the zone send from the params exists in our database. When user create a new person, the data that is used for city localisation is provided by a remote datassouce.
+            // Check if the zone send from the params exists in our database. When user create a new person, the data that is used for zone localisation is provided by a remote datassouce.
             $zone = $this->_localZoneRepository->findUnique($params->zoneID);
             if (!isset($zone)) {
                 // Trying to fetch the zone from the remote repo. If it doesn't exists, we just send an error response.

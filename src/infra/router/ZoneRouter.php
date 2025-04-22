@@ -19,13 +19,12 @@ class ZoneRouter
     public static function defineRoutes(): void
     {
         SimpleRouter::group(['prefix' => '/zones'], function () {
-            SimpleRouter::get("/remote", function () {
+            SimpleRouter::get("/local", function () {
                 /** @var FindLocalZones */
                 $findLocalZones = Container::get()->resolve(FindLocalZones::class);
                 $result = $findLocalZones->perform(
                     new FindZonesParams(
-                        id: $_GET["id"] ?? null,
-                        name: $_GET["name"] ?? null,
+                        name: $_GET["name"],
                     )
                 );
                 http_response_code($result->code);
@@ -33,11 +32,10 @@ class ZoneRouter
                 exit;
             });
 
-            SimpleRouter::get("/local", function () {
+            SimpleRouter::get("/remote", function () {
                 $findRemoteZones = Container::get()->resolve(FindRemoteZones::class);
                 $result = $findRemoteZones->perform(
                     new FindZonesParams(
-                        id: $_GET["id"] ?? null,
                         name: $_GET["name"] ?? null,
                     )
                 );

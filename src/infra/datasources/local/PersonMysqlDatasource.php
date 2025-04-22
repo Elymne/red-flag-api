@@ -23,29 +23,29 @@ class PersonMysqlDatasource implements LocalPersonRepository
 
     public function findMany(
         string|null $firstname = null,
-        string|null $lastName = null,
+        string|null $lastname = null,
+        string|null $zonename = null,
         string|null $jobname = null,
-        string|null $zoneName = null
     ): array {
         // Prapare the statement.
         /** @var string */
-        $query = "SELECT HEX(id) as id, first_name, last_name, job_name, id_zone, created_at, updated_at, zone.id, zone.name FROM person INNER JOIN zone ON zone.id = id_zone WHERE 1=1";
+        $query = "SELECT HEX(person.id) as id, first_name, last_name, job_name, id_zone, created_at, updated_at, zone.id, zone.name FROM person INNER JOIN zone ON zone.id = id_zone WHERE 1=1";
         $params = [];
         if (!is_null($firstname)) {
             $query .= " AND first_name = ?";
             $params[] = $firstname;
         }
-        if (!is_null($lastName)) {
+        if (!is_null($lastname)) {
             $query .= " AND last_name = ?";
-            $params[] = $lastName;
+            $params[] = $lastname;
         }
         if (!is_null($jobname)) {
             $query .= " AND job_name = ?";
             $params[] = $jobname;
         }
-        if (!is_null($zoneName)) {
+        if (!is_null($zonename)) {
             $query .= " AND zone.name = ?";
-            $params[] = $zoneName;
+            $params[] = $zonename;
         }
         $stmt = $this->_db->getMysqli()->prepare($query);
         // Inject the value.
@@ -60,7 +60,7 @@ class PersonMysqlDatasource implements LocalPersonRepository
         $persons = [];
         while ($row = $result->fetch_assoc()) {
             array_push($persons, new Person(
-                id: $row["id"],
+                id: $row["person_id"],
                 firstName: $row["first_name"],
                 lastName: $row["last_name"],
                 jobName: $row["job_name"],

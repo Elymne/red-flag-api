@@ -27,14 +27,39 @@ class PersonRouter
     {
         SimpleRouter::group(['prefix' => '/persons'], function () {
             SimpleRouter::get("/", function () {
+
+                /** @var string|null */
+                $firstname = null;
+                if (isset($_GET["firstname"])) {
+                    $firstname = $_GET["firstname"];
+                }
+
+                /** @var string|null */
+                $lastname = null;
+                if (isset($_GET["lastname"])) {
+                    $lastname = $_GET["lastname"];
+                }
+
+                /** @var string|null */
+                $zonename = null;
+                if (isset($_GET["zonename"])) {
+                    $zonename = $_GET["zonename"];
+                }
+
+                /** @var string|null */
+                $jobname = null;
+                if (isset($_GET["jobname"])) {
+                    $jobname = $_GET["jobname"];
+                }
+
                 /** @var FindPersons */
                 $findPersons = Container::get()->resolve(FindPersons::class);
                 // Fetch persons.
                 $result = $findPersons->perform(new FindPersonsParams(
-                    firstname: $_GET["firstname"],
-                    lastname: $_GET["lastname"],
-                    zonename: $_GET["zonename"],
-                    jobname: $_GET["jobname"],
+                    firstname: $firstname,
+                    lastname: $lastname,
+                    zonename: $zonename,
+                    jobname: $jobname,
                 ));
                 // send response.
                 http_response_code($result->code);
@@ -60,6 +85,7 @@ class PersonRouter
                 $result = $insertPerson->perform(new InsertPersonParams(
                     firstname: $_POST["firstname"],
                     lastname: $_POST["firstname"],
+                    jobname: $_POST["jobname"],
                     zoneID: $_GET["zoneid"]
                 ));
                 // send response.

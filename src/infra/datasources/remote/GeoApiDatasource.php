@@ -27,10 +27,10 @@ class GeoApiDatasource implements RemoteZoneRepository
 
         $result = [];
         for ($i = 0; $i < 100 && $i < count($rawCities); $i++) {
-            $rawCity = $rawCities[$i];
+            $rawZone = $rawCities[$i];
             array_push($result, new Zone(
-                id: $rawCity["code"],
-                name: $rawCity["nom"]
+                id: $rawZone["code"],
+                name: $rawZone["nom"]
             ));
         }
 
@@ -49,11 +49,11 @@ class GeoApiDatasource implements RemoteZoneRepository
         ]);
 
         $response = file_get_contents(filename: $url, context: $context);
-        $rawCity = json_decode($response, true);
+        $rawZone = json_decode($response, true);
 
         return new Zone(
-            id: $rawCity["code"],
-            name: $rawCity["nom"]
+            id: $rawZone["code"],
+            name: $rawZone["nom"]
         );
     }
 }

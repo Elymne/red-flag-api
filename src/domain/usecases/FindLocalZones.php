@@ -33,6 +33,7 @@ class FindLocalZones extends Usecase
             // Return zones from remotes.
             return new Result(200, $zones);
         } catch (Throwable $err) {
+            echo $err;
             return new Result(code: 500, data: "Action failure : Internal Server Error.");
         }
     }

@@ -36,7 +36,7 @@ class Router implements RouterGateway
                 exit;
             });
 
-            // Implements all City routes.
+            // Implements all Zone routes.
             ZoneRouter::defineRoutes();
 
             // Implements all Persons routes.
