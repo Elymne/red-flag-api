@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Domain\Usecases;
 
+use Core\ApiResponse;
+use Core\LogData;
 use Core\Result;
 use Core\Usecase;
 use Domain\Models\Link;
@@ -34,39 +36,164 @@ class InsertLink extends Usecase
     public function perform(mixed $params): Result
     {
         try {
-            // Check $params type.
+            // * Check $params type.
             if (!isset($params) || !($params instanceof InsertLinkParams)) {
-                return new Result(code: 400, data: "Action failure : the data send from body is not correct. Should be a InsertMessageParams structure.");
+                return new Result(
+                    code: 400,
+                    response: new ApiResponse(
+                        success: false,
+                        message: "An internal error occured.",
+                    ),
+                    logData: new LogData(
+                        type: LogData::ERROR,
+                        message: "Action failure : Argument provided to InsertLink usecase ins't a InsertLinkParams object.",
+                        trace: [
+                            "expected" => InsertLinkParams::class,
+                            "given" => gettype($params),
+                        ],
+                        file: __FILE__,
+                    ),
+                );
             }
-            $parsedUrl = parse_url($params->link);
-            // Check that the URL uses HTTPS.
-            if ($parsedUrl["scheme"] != 'https') {
-                return new Result(code: 400, data: "Action failure : the provided link is not a valid HTTPS URL.");
+
+            // * Parse URL.
+            $parsedUrl = parse_url($params->source);
+
+            // * Check that the URL uses HTTPS.
+            if ($parsedUrl["scheme"] != "https") {
+                return new Result(
+                    code: 406,
+                    response: new ApiResponse(
+                        success: false,
+                        message: "Invalid https structure.",
+                    ),
+                    logData: new LogData(
+                        type: LogData::ERROR,
+                        message: "Action failure : Invalid https structure provided.",
+                        trace: [
+                            "source" => $params->source,
+                        ],
+                        file: __FILE__,
+                    ),
+                );
             }
-            // Extract the domain name.
-            if (!isset($parsedUrl['host'])) {
-                return new Result(code: 400, data: "Action failure : unable to extract domain name from the provided URL.");
+
+            // * Extract the domain name.
+            if (!isset($parsedUrl["host"])) {
+                return new Result(
+                    code: 406,
+                    response: new ApiResponse(
+                        success: false,
+                        message: "Problems with hostname.",
+                    ),
+                    logData: new LogData(
+                        type: LogData::ERROR,
+                        message: "Action failure : Unable to extract hostname : $params->source.",
+                        trace: [
+                            "source" => $params->source,
+                        ],
+                        file: __FILE__,
+                    ),
+                );
             }
-            // Check that the domain name exists in our filter.
-            $requestedDomain = $this->_localDomainRepository->findUnique($parsedUrl['host']);
-            if (!isset($requestedDomain)) {
-                return new Result(code: 400, data: "Action failure : the domain name is not accepted.");
+
+            // * Check that the domain name exists in our filter.
+            if (!$this->_localDomainRepository->doesExists($parsedUrl["host"])) {
+                return new Result(
+                    code: 406,
+                    response: new ApiResponse(
+                        success: false,
+                        message: "Not Acceptable hostname.",
+                    ),
+                    logData: new LogData(
+                        type: LogData::ERROR,
+                        message: "Action failure : Hostname invalid : $params->source.",
+                        trace: [
+                            "hostname" => $parsedUrl["host"],
+                        ],
+                        file: __FILE__,
+                    ),
+                );
             }
-            // check that person exists.
-            $person = $this->_localPersonRepository->findUnique($params->personID);
+
+            // * Check that person exists.
+            $personUUID = $this->_uuidRepository->toBytes($params->personID);
+            $person = $this->_localPersonRepository->findUnique($personUUID);
             if (!isset($person)) {
-                return new Result(code: 400, data: "Action failure : the person does not exists.");
+                return new Result(
+                    code: 406,
+                    response: new ApiResponse(
+                        success: false,
+                        message: "Person not found.",
+                    ),
+                    logData: new LogData(
+                        type: LogData::ERROR,
+                        message: "Action failure : Person with id $params->personID not found.",
+                        file: __FILE__,
+                    ),
+                );
             }
-            // Insert the new message.
-            $this->_localPersonRepository->addLink($params->personID, new Link(
-                $this->_uuidRepository->generate(),
-                $params->link,
-                createdAt: time()
-            ));
-            // Success response.
-            return new Result(code: 201, data: "Action success : new entry in message database.");
+
+            // * Check that the same article isn't existing in database.
+            foreach ($person->links as $link) {
+                // * Cast Link object.
+                $link = $link instanceof Link ? $link : null;
+                // * Should not happen but if link isn't typed as Link.
+                if ($link == null) continue;
+                if ($link->source === $params->source) {
+                    return new Result(
+                        code: 400,
+                        response: new ApiResponse(
+                            success: false,
+                            message: "Trying to duplicate link.",
+                        ),
+                        logData: new LogData(
+                            type: LogData::INFO,
+                            message: "Action failure : Duplicate link for person $params->personID.",
+                            file: __FILE__,
+                        ),
+                    );
+                }
+            }
+
+            // * Insert the new message.
+            $this->_localPersonRepository->addLink(
+                $personUUID,
+                new Link(
+                    ID: $this->_uuidRepository->generateBytes(),
+                    source: $params->source,
+                    createdAt: time(),
+                )
+            );
+
+            // * Success response.
+            return new Result(
+                code: 201,
+                response: new ApiResponse(
+                    success: true,
+                    message: "Link created.",
+                ),
+                logData: new LogData(
+                    type: LogData::INFO,
+                    message: "Action success : Link created with success.",
+                    trace: $params,
+                    file: __FILE__,
+                ),
+            );
         } catch (Throwable $err) {
-            return new Result(code: 500, data: "Action failure : Internal Server Error.");
+            return new Result(
+                code: 500,
+                response: new ApiResponse(
+                    success: false,
+                    message: "An internal error occured.",
+                ),
+                logData: new LogData(
+                    type: LogData::CRITICAL,
+                    message: "Action failure : Unexpected error occured.",
+                    trace: $err,
+                    file: __FILE__,
+                ),
+            );
         }
     }
 }

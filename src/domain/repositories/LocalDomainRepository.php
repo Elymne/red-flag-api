@@ -5,10 +5,19 @@ namespace Domain\Repositories;
 interface LocalDomainRepository
 {
     /**
-     * Find all domain that can correspond to the domain from arg1.
+     * Find all domains.
      * 
-     * @param string $value
-     * @return string
+     * @return string[] List of all domain's name.
      */
-    function findUnique(string $value): string|null;
+    function findAll(): array;
+
+    /**
+     * Check that the domain given to params exists or not.
+     * 
+     * @param string $domainName
+     * @return bool
+     */
+    function doesExists(
+        string $domainName
+    ): bool;
 }

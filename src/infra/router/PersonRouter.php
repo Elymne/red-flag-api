@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace Infra\Router;
 
+use Core\ApiResponse;
+use Core\Result;
+use Core\Container;
 use Domain\Usecases\FindPersons;
 use Domain\Usecases\FindPersonsParams;
-use Domain\Usecases\FindUniquePerson;
-use Domain\Usecases\FindUniquePersonParams;
+use Domain\Usecases\FindPersonByID;
+use Domain\Usecases\FindPersonByIDParams;
 use Domain\Usecases\InsertLink;
 use Domain\Usecases\InsertLinkParams;
-use Domain\Usecases\InsertMessage;
-use Domain\Usecases\InsertMessageParams;
 use Domain\Usecases\InsertPerson;
 use Domain\Usecases\InsertPersonParams;
-use Infra\Di\Container;
 use Pecee\SimpleRouter\SimpleRouter;
 
 /**
@@ -23,78 +23,120 @@ use Pecee\SimpleRouter\SimpleRouter;
  */
 class PersonRouter
 {
+    public function getPersons(): void
+    {
+        /** @var string|null */
+        $firstname = isset($_GET["firstname"]) ? $_GET["firstname"] : null;
+        /** @var string|null */
+        $lastname = isset($_GET["lastname"]) ? $_GET["lastname"] : null;
+        /** @var int|null */
+        $birthDate = isset($_GET["birthDate"]) ? intval($_GET["birthDate"])  : null;
+        /** @var string|null */
+        $zoneID = isset($_GET["zoneID"]) ? $_GET["zoneID"] : null;
+        /** @var string|null */
+        $companyID = isset($_GET["companyID"]) ? $_GET["companyID"] : null;
+        /** @var string|null */
+        $activityID = isset($_GET["activityID"]) ? $_GET["activityID"] : null;
+        /** @var FindPersons */
+        $findPersons = Container::get()->resolve(FindPersons::class);
+        $result = $findPersons->perform(new FindPersonsParams(
+            firstname: $firstname,
+            lastname: $lastname,
+            birthDate: $birthDate,
+            zoneID: $zoneID,
+            companyID: $companyID,
+            activityID: $activityID,
+        ));
+        header("Content-Type: application/json");
+        http_response_code($result->code);
+        echo json_encode($result->response);
+        exit;
+    }
+
+    public function getPersonByID($id): void
+    {
+        /** @var FindPersonByID */
+        $FindLocalPerson = Container::get()->resolve(FindPersonByID::class);
+        /** @var Result */
+        $result = $FindLocalPerson->perform(new FindPersonByIDParams($id));
+        header("Content-Type: application/json");
+        http_response_code($result->code);
+        echo json_encode($result->response);
+        exit;
+    }
+
+    public function createPerson(): void
+    {
+        $data = json_decode(file_get_contents("php://input"), true);
+        if (
+            !isset($data["firstname"]) ||
+            !isset($data["lastname"]) ||
+            !isset($data["birthDate"]) ||
+            !isset($data["zoneID"]) ||
+            !isset($data["companyID"]) ||
+            !isset($data["activityID"])
+        ) {
+            header("Content-Type: application/json");
+            http_response_code(406);
+            echo json_encode(new ApiResponse(
+                success: false,
+                message: "Query missing : {firstname}, {lastname}, {birthDate}, {zoneID}, {companyID} and {activityID} should be provided.",
+            ));
+            exit;
+        }
+        /** @var InsertPerson */
+        $insertPerson = Container::get()->resolve(InsertPerson::class);
+        /** @var Result */
+        $result = $insertPerson->perform(new InsertPersonParams(
+            firstname: $data["firstname"],
+            lastname: $data["lastname"],
+            birthDate: intval($data["birthDate"]),
+            zoneID: $data["zoneID"],
+            companyID: $data["companyID"],
+            activityID: $data["activityID"],
+        ));
+        header("Content-Type: application/json");
+        http_response_code($result->code);
+        echo json_encode($result->response);
+        exit;
+    }
+
+    public function addLink(): void
+    {
+        $data = json_decode(file_get_contents("php://input"), true);
+        if (
+            !isset($data["personID"]) ||
+            !isset($data["source"])
+        ) {
+            header("Content-Type: application/json");
+            http_response_code(406);
+            echo json_encode(new ApiResponse(
+                success: false,
+                message: "Query missing : {personID} and {source} should be provided.",
+            ));
+            exit;
+        }
+        /** @var InsertLink */
+        $insertLink = Container::get()->resolve(InsertLink::class);
+        /** @var Result */
+        $result = $insertLink->perform(new InsertLinkParams(
+            personID: $data["personID"],
+            source: $data["link"],
+        ));
+        header("Content-Type: application/json");
+        http_response_code($result->code);
+        echo json_encode($result->response);
+        exit;
+    }
+
+
     public static function defineRoutes(): void
     {
-        SimpleRouter::group(['prefix' => '/persons'], function () {
-            SimpleRouter::get("/", function () {
-                /** @var FindPersons */
-                $findPersons = Container::get()->resolve(FindPersons::class);
-                // Fetch persons.
-                $result = $findPersons->perform(new FindPersonsParams(
-                    firstname: $_GET["firstname"],
-                    lastname: $_GET["lastname"],
-                    zonename: $_GET["zonename"],
-                    jobname: $_GET["jobname"],
-                ));
-                // send response.
-                http_response_code($result->code);
-                echo json_encode($result->data);
-                exit;
-            });
-
-            SimpleRouter::get("/{id}", function ($id) {
-                /** @var FindUniquePerson */
-                $findUniquePerson = Container::get()->resolve(FindUniquePerson::class);
-                // Fetch unique person.
-                $result = $findUniquePerson->perform(new FindUniquePersonParams($id));
-                // send response.
-                http_response_code($result->code);
-                echo json_encode($result->data);
-                exit;
-            });
-
-            SimpleRouter::post("/", function () {
-                /** @var InsertPerson */
-                $insertPerson = Container::get()->resolve(InsertPerson::class);
-                // Insert person.
-                $result = $insertPerson->perform(new InsertPersonParams(
-                    firstname: $_POST["firstname"],
-                    lastname: $_POST["firstname"],
-                    zoneID: $_GET["zoneid"]
-                ));
-                // send response.
-                http_response_code($result->code);
-                echo json_encode($result->data);
-                exit;
-            });
-
-            SimpleRouter::post("/messages", function () {
-                /** @var InsertMessage */
-                $findMessage = Container::get()->resolve(InsertMessage::class);
-                // Insert message.
-                $result = $findMessage->perform(new InsertMessageParams(
-                    personID: $_POST["personid"],
-                    message: $_POST["message"],
-                ));
-                // send response.
-                http_response_code($result->code);
-                echo json_encode($result->data);
-                exit;
-            });
-
-            SimpleRouter::post("/links", function () {
-                /** @var InsertLink */
-                $findMessage = Container::get()->resolve(InsertLink::class);
-                // Insert link.
-                $result = $findMessage->perform(new InsertLinkParams(
-                    personID: $_POST["personid"],
-                    link: $_POST["link"],
-                ));
-                // send response.
-                http_response_code($result->code);
-                echo json_encode($result->data);
-                exit;
-            });
+        SimpleRouter::group(["prefix" => "/persons"], function () {
+            SimpleRouter::get("/",  [self::class, "getPersons"]);
+            SimpleRouter::get("/{id}",  [self::class, "getPersonByID"]);
+            SimpleRouter::post("/",  [self::class, "createPerson"]);
+            SimpleRouter::post("/links",  [self::class, "addLink"]);
         });
     }
 }

@@ -7,28 +7,31 @@ use Domain\Models\Zone;
 interface LocalZoneRepository
 {
     /**
-     * Find as many as possible cities depending of args given to the function.
-     * If no args are given, we may return nothing.
+     * Find zones that exists in our database.
+     * Can be useful to only get zones that are linked to our person stored in database.
      * 
      * @param string|null $name
      * @return Zone[]
      */
-    function findMany(string|null $name = null, string|null $id = null): array;
+    function findMany(
+        string|null $name = null,
+    ): array;
 
     /**
-     * Find a unique city given the id.
+     * Find a unique zone given the id.
      *  
-     * @param string $id
-     * @return Zone
+     * @param string $ID
+     * @return Zone|null
      */
-    function findUnique(string $id): Zone|null;
+    function findUnique(
+        string $ID
+    ): Zone|null;
 
     /**
-     * Insert a new city to database.
+     * Insert a new zone to database.
      *  
-     * @param Zone $city
-     * The id is not generated from server. The id is just the "code commune" of the city.
-     * @return Zone Inserted Zone data.
+     * @param Zone $zone
+     * The id is not generated from server. The id is just the "code" of the zone (depending of the region).
      */
-    function createOne(Zone $city): void;
+    function createOne(Zone $zone): void;
 }

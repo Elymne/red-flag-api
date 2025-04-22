@@ -1,0 +1,40 @@
+openapi: 3.0.0
+info:
+  title: 'Red-flags API'
+  description: 'API REST for RedFlags mobile apps (Android).'
+  contact:
+    email: sacha.djurdjevic@gmail.com
+  version: '0.1'
+paths:
+  /api/activities:
+    get:
+      operationId: 67e33b12f680df1538b4aa8378f1db04
+      responses:
+        '200':
+          description: 'Action success : list of activities.'
+        '400':
+          description: 'Action failure : the data send from body is not correct. Should be a FindActivitiesParams structure.'
+        '500':
+          description: 'Action failure : internal Server Error.'
+  '/activities/{id}':
+    get:
+      operationId: a9a1455a7b7bbeaf7e8f6acbe2d17c24
+      responses:
+        '200':
+          description: 'Action success : unique activity.'
+        '400':
+          description: 'Action failure : the data send from body is not correct. Should be a FindActivityByIDParams structure.'
+        '404':
+          description: 'Action failure : this activty does not exists.'
+        '500':
+          description: 'Action failure : Internal Server Error.'
+  /api/zones:
+    get:
+      operationId: b61a5f09cc9c26a9fc97f505907e3707
+      responses:
+        '200':
+          description: 'Action success : list of zones.'
+        '400':
+          description: 'Action failure : no query param (name).'
+        '500':
+          description: 'Action failure : Internal Server Error.'

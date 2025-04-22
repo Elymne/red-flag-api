@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Infra\Datasources;
 
+use Domain\Models\Activity;
+use Domain\Models\Company;
 use Domain\Models\Person;
-use Domain\Models\PersonDetailed;
 use Domain\Models\Link;
-use Domain\Models\Message;
 use Domain\Models\Zone;
 use Domain\Repositories\LocalPersonRepository;
-use Ramsey\Uuid\Uuid;
+use mysqli_result;
 
 class PersonMysqlDatasource implements LocalPersonRepository
 {
@@ -23,190 +23,255 @@ class PersonMysqlDatasource implements LocalPersonRepository
 
     public function findMany(
         string|null $firstname = null,
-        string|null $lastName = null,
-        string|null $jobname = null,
-        string|null $zoneName = null
+        string|null $lastname = null,
+        int|null $birthDate = null,
+        string|null $activityID = null,
+        string|null $companyID = null,
+        string|null $zoneID = null,
     ): array {
-        // Prapare the statement.
+        // * Prepare the statement.
         /** @var string */
-        $query = "SELECT HEX(id) as id, first_name, last_name, job_name, id_zone, created_at, updated_at, zone.id, zone.name FROM person INNER JOIN zone ON zone.id = id_zone WHERE 1=1";
+        $query = "SELECT HEX(person.id) as id, first_name, last_name, birth_date, id_zone, id_company, id_activity, created_at FROM person WHERE 1=1";
+        $types = "";
         $params = [];
-        if (!is_null($firstname)) {
+        if (isset($firstname)) {
             $query .= " AND first_name = ?";
+            $types .= "s";
             $params[] = $firstname;
         }
-        if (!is_null($lastName)) {
+        if (isset($lastname)) {
             $query .= " AND last_name = ?";
-            $params[] = $lastName;
+            $types .= "s";
+            $params[] = $lastname;
         }
-        if (!is_null($jobname)) {
-            $query .= " AND job_name = ?";
-            $params[] = $jobname;
+        if (isset($birthDate)) {
+            $query .= " AND birth_date = ?";
+            $types .= "i";
+            $params[] = $birthDate;
         }
-        if (!is_null($zoneName)) {
-            $query .= " AND zone.name = ?";
-            $params[] = $zoneName;
+        if (!is_null($activityID)) {
+            $query .= " AND id_activity = ?";
+            $types .= "s";
+            $params[] = $activityID;
+        }
+        if (!is_null($companyID)) {
+            $query .= " AND id_company = ?";
+            $types .= "s";
+            $params[] = $companyID;
+        }
+        if (!is_null($zoneID)) {
+            $query .= " AND id_zone = ?";
+            $types .= "s";
+            $params[] = $zoneID;
         }
         $stmt = $this->_db->getMysqli()->prepare($query);
-        // Inject the value.
+
+        // * Inject values.
         if (!empty($params)) {
-            $stmt->bind_param(str_repeat('s', count($params)), ...$params);
+            $stmt->bind_param($types, ...$params);
         }
-        // Run SQL Command and fetch result.
+
+        // * Run SQL Command and fetch result.
         $stmt->execute();
         $result = $stmt->get_result();
-        // Parse persons.
+
+        // * Parse persons.
         /** @var Person[] */
-        $persons = [];
-        while ($row = $result->fetch_assoc()) {
-            array_push($persons, new Person(
-                id: $row["id"],
-                firstName: $row["first_name"],
-                lastName: $row["last_name"],
-                jobName: $row["job_name"],
-
-                zone: new Zone(
-                    id: $row["zone.id"],
-                    name: $row["zone.name"],
-                ),
-
-                createdAt: $row["created_at"],
-                updatedAt: $row["updated_at"]
-            ));
-        }
+        $persons = $this->_parsePersons($result);
         return $persons;
     }
 
-    public function findUnique(string $id): PersonDetailed|null
-    {
-        // Generate bytes from UUID for Mysql version used.
-        $uuid = Uuid::fromString($id)->getBytes();
-        // Prapare the statement for link data.
-        $query =
-            "SELECT HEX(id_person) as id_person, HEX(id) as id, l.value, l.created_at, l.updated_at 
-            FROM link
-            WHERE id_person = ?";
+    public function doesExists(
+        string $firstname,
+        string $lastname,
+        int $birthDate,
+        string $activityID,
+        string $companyID,
+        string $zoneID,
+    ): bool {
+        // * Prepare the statement.
+        /** @var string */
+        $query = "SELECT count(*) as nb
+            FROM person
+            WHERE first_name = ? AND last_name = ? AND birth_date = ? AND id_activity = ? AND id_company = ? AND id_zone = ?";
         $stmt = $this->_db->getMysqli()->prepare($query);
-        // Inject the value.
-        $stmt->bind_param("s", $uuid);
-        // Run SQL Command and fetch result.
+
+        // * Inject values.
+        $stmt->bind_param("ssisss", $firstname, $lastname, $birthDate, $activityID, $companyID, $zoneID);
+
+        // * Run SQL Command and fetch result.
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        // * Get the first line only.
+        $nb = intval(mysqli_fetch_assoc($result)["nb"]);
+
+        // * Check if ppl exists or not.
+        return $nb > 0;
+    }
+
+    public function findUnique(string $ID): Person|null
+    {
+        // * Prapare the statement for link data.
+        $query = "SELECT HEX(id_person) as id_person, HEX(id) as link_id, source, created_at FROM link WHERE id_person = ?";
+        $stmt = $this->_db->getMysqli()->prepare($query);
+
+        // * Inject the value.
+        $stmt->bind_param("s", $ID);
+
+        // * Using bytes force me to use this.
+        $stmt->send_long_data(0, $ID);
+
+        // * Run SQL Command and fetch result.
         $stmt->execute();
         $linksResult = $stmt->get_result();
-        // Parse links.
+
+        // * Parse links.
         /** @var Link[] */
-        $links = [];
-        while ($row = $linksResult->fetch_assoc()) {
-            array_push($links, new Link(
-                id: $row["id"],
-                value: $row["l.value"],
-                createdAt: $row["l.created_at"],
-                updatedAt: $row["l.updated_at"],
-            ));
-        }
-        // Prapare the statement for message data.
-        $query =
-            "SELECT HEX(id_person) as id_person, HEX(id) as id, m.value, m.created_at, m.updated_at 
-            FROM message
-            WHERE id_person = ?";
-        $stmt = $this->_db->getMysqli()->prepare($query);
-        // Inject the value.
-        $stmt->bind_param("s", [$uuid]);
-        // Run SQL Command and fetch result.
-        $stmt->execute();
-        $messagesResult = $stmt->get_result();
-        // Parse messages.
-        /** @var Message[] */
-        $messages = [];
-        while ($row = $messagesResult->fetch_assoc()) {
-            array_push($messages, new Message(
-                id: $row["id"],
-                value: $row["m.value"],
-                createdAt: $row["m.created_at"],
-                updatedAt: $row["m.updated_at"],
-            ));
-        }
-        // Prapare the statement for person data.
+        $links = $this->_parseLinks($linksResult);
+
+        // * Prapare the statement for person data.
         /** @var string */
-        $query =
-            "SELECT HEX(id) as id, first_name, last_name, job_name, id_zone, created_at, updated_at, zone.id, zone.name 
-            FROM person 
-            INNER JOIN zone ON zone.id = id_zone 
-            WHERE id = ?";
+        $query = "SELECT HEX(person.id) as id, first_name, last_name, birth_date, id_zone, id_company, id_activity, created_at FROM person WHERE id = ?";
         $stmt = $this->_db->getMysqli()->prepare($query);
-        // Inject the value.
-        $stmt->bind_param("s", [$uuid]);
-        // Run SQL Command and fetch result.
+
+        // * Inject the value.
+        $stmt->bind_param("s", $ID);
+
+        // * Using bytes force me to use this.
+        $stmt->send_long_data(0, $ID);
+
+        // * Run SQL Command and fetch result.
         $stmt->execute();
         $PersonsResult = $stmt->get_result();
-        // Parse persons.
-        /** @var PersonDetailed[] */
-        $persons = [];
-        while ($row = $PersonsResult->fetch_assoc()) {
-            array_push($persons, new PersonDetailed(
-                id: $row["id"],
-                firstName: $row["first_name"],
-                lastName: $row["last_name"],
-                jobName: $row["job_name"],
 
-                zone: new Zone(
-                    id: $row["zone.id"],
-                    name: $row["zone.name"],
-                ),
+        // * Parse persons.
+        /** @var Person[] */
+        $persons = $this->_parsePersons($PersonsResult, $links);
 
-                links: $links,
-                messages: $messages,
-
-                createdAt: $row["created_at"],
-                updatedAt: $row["updated_at"]
-            ));
-        }
-        // Check if data exists, return null when it's not the case.
+        // * Check if data exists, return null when it's not the case.
         if (count($persons) == 0) {
             return null;
         }
-        //Return the first value.
+
+        // * Return the first value.
         return $persons[0];
     }
 
 
-    function createOne(Person $person): void
+    public function createOne(Person $person): void
     {
-        // Prepare statement for person.
+        // * Prepare statement for person.
         /** @var string */
-        $query = "INSERT INTO person (id, first_name, last_name, job_name, created_at, updated_at, id_zone) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        $query = "INSERT INTO person (id, first_name, last_name, birth_date, id_zone, id_company, id_activity, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         $stmt = $this->_db->getMysqli()->prepare($query);
-        // Inject values.
-        $uuid = Uuid::fromString($person->id)->getBytes();
-        $stmt->bind_param("issiis", [$uuid, $person->firstName, $person->lastName, $person->jobName, $person->createdAt, $person->updatedAt, $person->zone->id]);
-        // Run SQL Command and fetch result.
+
+        // ? bind_param apply changes to binded params.
+        $uuid = $person->ID;
+        $firstname = $person->firstname;
+        $lastName = $person->lastname;
+        $birthDate = $person->birthDate;
+        $zoneID = $person->zone->ID;
+        $activityID = $person->activity->ID;
+        $companyID = $person->company->ID;
+        $created_at =  $person->createdAt;
+
+        // * Inject params.
+        $stmt->bind_param(
+            "bssisssi",
+            $uuid,
+            $firstname,
+            $lastName,
+            $birthDate,
+            $zoneID,
+            $activityID,
+            $companyID,
+            $created_at
+        );
+
+        // * I need to use this because I'm using Bytes type for UUID.
+        $stmt->send_long_data(0, $uuid);
+
+        // * Run SQL Command.
         $stmt->execute();
     }
 
-    function addMessage(string $id, Message $message): void
+    public function addLink(string $personID, Link $link): void
     {
-        // Prepare statement for person.
+        // * Prepare statement for person.
         /** @var string */
-        $query = "INSERT INTO message (id, value, id_person, created_at, updated_at) VALUES (?, ?, ?, ?, ?)";
+        $query = "INSERT INTO link (id, source, created_at, id_person) VALUES (?, ?, ?, ?)";
         $stmt = $this->_db->getMysqli()->prepare($query);
-        // Inject values.
-        $person_id = Uuid::fromString($id)->getBytes();
-        $message_id = Uuid::fromString($message->id)->getBytes();
-        $stmt->bind_param("issii", [$message_id, $message->value, $person_id, $message->createdAt, $message->updatedAt]);
-        // Run SQL Command and fetch result.
+
+        // ? bind_param apply changes to binded params.
+        $linkID = $link->ID;
+        $linkSource = $link->source;
+        $linkCreatedAt = $link->createdAt;
+
+        // * Inject params.
+        $stmt->bind_param("bsib", $linkID, $linkSource, $linkCreatedAt, $personID);
+
+        // * I need to use this because I'm using Bytes type for UUID.
+        $stmt->send_long_data(0, $linkID);
+        $stmt->send_long_data(3, $personID);
+
+        // * Run SQL Command and fetch result.
         $stmt->execute();
     }
 
-    function addLink(string $id, Link $link): void
+    /**
+     * @param mysqli_result $result
+     * @return Link[]
+     */
+    private function _parseLinks(mysqli_result $result): array
     {
-        // Prepare statement for person.
-        /** @var string */
-        $query = "INSERT INTO link (id, value) VALUES (?, ?)";
-        $stmt = $this->_db->getMysqli()->prepare($query);
-        // Inject values.
-        $person_id = Uuid::fromString($id)->getBytes();
-        $link_id = Uuid::fromString($link->id)->getBytes();
-        $stmt->bind_param("issii", [$link_id, $link->value, $person_id, $link->createdAt, $link->updatedAt]);
-        // Run SQL Command and fetch result.
-        $stmt->execute();
+        /** @var Link[] */
+        $links = [];
+        while ($row = $result->fetch_assoc()) {
+            array_push($links, new Link(
+                ID: $row["id"],
+                source: $row["source"],
+                createdAt: intval($row["created_at"]),
+
+            ));
+        }
+        return $links;
+    }
+
+    /**
+     * @param mysqli_result $result
+     * @return Person[]
+     */
+    private function _parsePersons(mysqli_result $result, array $links = []): array
+    {
+        /** @var Person[] */
+        $persons = [];
+        while ($row = $result->fetch_assoc()) {
+            array_push($persons, new Person(
+                ID: $row["id"],
+                firstname: $row["first_name"],
+                lastname: $row["last_name"],
+                pseudonym: null,
+                birthDate: intval($row["birth_date"]),
+                zone: new Zone(
+                    ID: $row["id_zone"],
+                    name: "",
+                ),
+                activity: new Activity(
+                    ID: $row["id_activity"],
+                    name: "",
+                ),
+                company: new Company(
+                    ID: $row["id_company"],
+                    name: "",
+                    address: "",
+                ),
+                links: $links,
+                createdAt: intval($row["created_at"]),
+                portrait: null,
+                description: null,
+            ));
+        }
+        return $persons;
     }
 }

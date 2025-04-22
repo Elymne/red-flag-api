@@ -6,10 +6,10 @@ use PHPUnit\Framework\TestCase;
 use Domain\Models\PersonDetailed;
 use Domain\Models\Zone;
 use Domain\Repositories\LocalPersonRepository;
-use Domain\Usecases\FindUniquePerson;
-use Domain\Usecases\FindUniquePersonParams;
+use Domain\Usecases\FindLocalPerson;
+use Domain\Usecases\FindLocalPersonParams;
 
-class FindUniquePersonTest extends TestCase
+class FindLocalPersonTest extends TestCase
 {
     private $_localPersonRepository;
 
@@ -28,9 +28,9 @@ class FindUniquePersonTest extends TestCase
         $uuid = "01";
 
         $this->_localPersonRepository->allows()->findUnique($uuid)->andReturns(null);
-        $findUniquePerson = new FindUniquePerson($this->_localPersonRepository);
+        $FindLocalPerson = new FindLocalPerson($this->_localPersonRepository);
 
-        $result = $findUniquePerson->perform(new FindUniquePersonParams(id: $uuid));
+        $result = $FindLocalPerson->perform(new FindLocalPersonParams(id: $uuid));
 
         $this->assertSame($result->code, 404);
         $this->assertSame($result->data, "Action failure : this person does not exists.");
@@ -51,9 +51,9 @@ class FindUniquePersonTest extends TestCase
         );
 
         $this->_localPersonRepository->allows()->findUnique($uuid)->andReturns($data);
-        $findUniquePerson = new FindUniquePerson($this->_localPersonRepository);
+        $FindLocalPerson = new FindLocalPerson($this->_localPersonRepository);
 
-        $result = $findUniquePerson->perform(new FindUniquePersonParams(id: $uuid));
+        $result = $FindLocalPerson->perform(new FindLocalPersonParams(id: $uuid));
 
         $this->assertSame($result->code, 200);
         $this->assertSame($result->data, $data);
@@ -63,21 +63,21 @@ class FindUniquePersonTest extends TestCase
     {
         $uuid = "01";
         $this->_localPersonRepository->allows()->findUnique($uuid)->andReturns(null);
-        $findUniquePerson = new FindUniquePerson($this->_localPersonRepository);
+        $FindLocalPerson = new FindLocalPerson($this->_localPersonRepository);
 
-        $result = $findUniquePerson->perform("String params");
+        $result = $FindLocalPerson->perform("String params");
 
         $this->assertSame($result->code, 400);
-        $this->assertSame($result->data, "Action failure : the data send from body is not correct. Should be a FindUniquePersonParams structure.");
+        $this->assertSame($result->data, "Action failure : the data send from body is not correct. Should be a FindLocalPersonParams structure.");
     }
 
     public function test_findButExceptionFromRepo(): void
     {
         $uuid = "01";
         $this->_localPersonRepository->allows()->findUnique($uuid)->andThrow(new \Exception("Repository exception"));
-        $findUniquePerson = new FindUniquePerson($this->_localPersonRepository);
+        $FindLocalPerson = new FindLocalPerson($this->_localPersonRepository);
 
-        $result = $findUniquePerson->perform(new FindUniquePersonParams(id: $uuid));
+        $result = $FindLocalPerson->perform(new FindLocalPersonParams(id: $uuid));
 
         $this->assertSame($result->code, 500);
         $this->assertSame($result->data, "Action failure : Internal Server Error.");

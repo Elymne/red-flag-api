@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Domain\Usecases;
 
+use Core\LogData;
 use Core\Result;
 use Core\Usecase;
 use Domain\Gateways\RouterGateway;
@@ -22,6 +23,7 @@ class Run extends Usecase
     {
         try {
             if ($_ENV["MODE"] == "develop") {
+                header("Access-Control-Allow-Origin: *");
                 ini_set('display_errors', 1);
             }
 
@@ -30,9 +32,24 @@ class Run extends Usecase
             }
 
             $this->_routerGateway->start();
-            return new Result(code: 0, data: null);
+            return new Result(
+                code: 0,
+                logData: new LogData(
+                    type: LogData::INTERNAL,
+                    message: "Action success : Route loaded",
+                    file: __FILE__,
+                ),
+            );
         } catch (Throwable $err) {
-            return new Result(code: 1, data: $err);
+            return new Result(
+                code: 1,
+                logData: new LogData(
+                    type: LogData::CRITICAL,
+                    message: "Action failure : Unexpected error occured.",
+                    trace: $err,
+                    file: __FILE__,
+                ),
+            );
         }
     }
 }

@@ -8,5 +8,8 @@ Run php server with :
 To kill process :
     fuser -k 8000/tcp
 
+Generate Swagger doc :
+    ./vendor/bin/openapi src -o openapi.yaml
+
 Run tests :
     ./vendor/bin/phpunit tests --display-deprecations

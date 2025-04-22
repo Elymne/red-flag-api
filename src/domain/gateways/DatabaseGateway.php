@@ -4,5 +4,5 @@ namespace Domain\Gateways;
 
 interface DatabaseGateway
 {
-    function runMigrations(): void;
+    public function runMigrations(): void;
 }

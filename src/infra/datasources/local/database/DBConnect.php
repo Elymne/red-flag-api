@@ -40,6 +40,9 @@ class DBConnect implements DatabaseGateway
 
     public function getMysqli(): mysqli
     {
+        if (!$this->_mysqli) {
+            throw new Exception("DBConnect : Trying to use sql client but the value is not set.");
+        }
         return $this->_mysqli;
     }
 

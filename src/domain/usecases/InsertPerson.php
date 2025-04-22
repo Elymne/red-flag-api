@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace Domain\Usecases;
 
+use Core\ApiResponse;
+use Core\LogData;
 use Core\Result;
 use Core\Usecase;
 use Domain\Models\Person;
 use Domain\Repositories\LocalPersonRepository;
-use Domain\Repositories\LocalZoneRepository;
+use Domain\Repositories\RemoteActivityRepository;
+use Domain\Repositories\RemoteCompanyRepository;
 use Domain\Repositories\RemoteZoneRepository;
 use Domain\Repositories\UuidRepository;
 use Infra\Datasources\DBConnect;
@@ -19,21 +22,24 @@ class InsertPerson extends Usecase
     private UuidRepository $_uuidRepository;
     private DBConnect $_db;
     private RemoteZoneRepository $_remoteZoneRepository;
+    private RemoteCompanyRepository $_remoteCompanyRepository;
+    private RemoteActivityRepository $_remoteActivityRepository;
     private LocalPersonRepository $_localPersonRepository;
-    private LocalZoneRepository $_localZoneRepository;
 
     public function __construct(
         UuidRepository $uuidRepository,
         DBConnect $db,
         RemoteZoneRepository $remoteZoneRepository,
+        RemoteCompanyRepository $remoteCompanyRepository,
+        RemoteActivityRepository $remoteActivityRepository,
         LocalPersonRepository $localPersonRepository,
-        LocalZoneRepository $localZoneRepository
     ) {
         $this->_uuidRepository = $uuidRepository;
         $this->_db = $db;
         $this->_remoteZoneRepository = $remoteZoneRepository;
+        $this->_remoteCompanyRepository = $remoteCompanyRepository;
+        $this->_remoteActivityRepository = $remoteActivityRepository;
         $this->_localPersonRepository = $localPersonRepository;
-        $this->_localZoneRepository = $localZoneRepository;
     }
 
     /**
@@ -42,56 +48,161 @@ class InsertPerson extends Usecase
     public function perform(mixed $params): Result
     {
         try {
-            // Check $params type.
+            // * Check $params type.
             if (!isset($params) || !($params instanceof InsertPersonParams)) {
-                return new Result(code: 400, data: "Action failure : the data send from body is not correct. Should be a InsertPersonParams structure.");
+                return new Result(
+                    code: 400,
+                    response: new ApiResponse(
+                        success: false,
+                        message: "An internal error occured.",
+                    ),
+                    logData: new LogData(
+                        type: LogData::ERROR,
+                        message: "Action failure : Argument provided to InsertPerson usecase ins't a InsertPersonParams object.",
+                        trace: [
+                            "expected" => InsertPersonParams::class,
+                            "given" => gettype($params),
+                        ],
+                        file: __FILE__,
+                    ),
+                );
             }
 
-            // Start transaction
+            // * Start transaction
             $this->_db->getMysqli()->begin_transaction();
 
-            // Check if the zone send from the params exists in our database. When user create a new person, the data that is used for city localisation is provided by a remote datassouce.
-            $zone = $this->_localZoneRepository->findUnique($params->zoneID);
+            // * Check that the zoneID exists.
+            $zone = $this->_remoteZoneRepository->findUnique($params->zoneID);
             if (!isset($zone)) {
-                // Trying to fetch the zone from the remote repo. If it doesn't exists, we just send an error response.
-                $zone = $this->_remoteZoneRepository->findUnique($params->zoneID);
-                if (!isset($zone)) {
-                    return new Result(code: 400, data: "Action failure : the zone code does not exists in remote datasource.");
+                return new Result(
+                    code: 404,
+                    response: new ApiResponse(
+                        success: false,
+                        message: "Zone not found.",
+                    ),
+                    logData: new LogData(
+                        type: LogData::INFO,
+                        message: "Action failure : Zone with id $params->zoneID not found.",
+                        file: __FILE__,
+                    ),
+                );
+            }
+
+            // * Check that the companyID exists (if not null).
+            /** @var Company|null */
+            $company = null;
+            if (isset($params->companyID)) {
+                $company = $this->_remoteCompanyRepository->findUnique($params->companyID);
+                if (!isset($company)) {
+                    return new Result(
+                        code: 404,
+                        response: new ApiResponse(
+                            success: false,
+                            message: "Company not found.",
+                        ),
+                        logData: new LogData(
+                            type: LogData::INFO,
+                            message: "Action failure : Company with id $params->companyID not found.",
+                            file: __FILE__,
+                        ),
+                    );
                 }
-                $this->_localZoneRepository->createOne($zone);
             }
 
-            // Check that user does not exists in database. If it's the case, we just send a 200 response.
-            $usersBeLike = $this->_localPersonRepository->findMany(
-                firstname: $params->firstname,
-                lastname: $params->lastname,
-                jobname: $params->jobname,
-                zonename: $zone->name
-            );
-            if (count($usersBeLike) != 0) {
-                return new Result(code: 400, data: "Action failure : the person already exists in database.");
+            // * Check that the activityID exists (if not null).
+            /** @var Activity|null */
+            $activity = null;
+            if (isset($params->activityID)) {
+                $activity = $this->_remoteActivityRepository->findUnique($params->activityID);
+                if (!isset($activity)) {
+                    return new Result(
+                        code: 404,
+                        response: new ApiResponse(
+                            success: false,
+                            message: "Activity not found.",
+                        ),
+                        logData: new LogData(
+                            type: LogData::INFO,
+                            message: "Action failure : Activity with id $params->activityID not found.",
+                            file: __FILE__,
+                        ),
+                    );
+                }
             }
 
-            // Insert the new Person to database.
-            $this->_localPersonRepository->createOne(
-                new Person(
-                    id: $this->_uuidRepository->generate(),
-                    firstName: $params->firstname,
-                    lastName: $params->lastname,
-                    jobName: $params->jobname,
-                    createdAt: time(),
-                    updatedAt: null,
-                    zone: $zone
-                )
-            );
+            // * Check that user does not exists in database. If it's the case, we just send a 406 response.
+            if ($this->_localPersonRepository->doesExists(
+                firstname: strtolower($params->firstname),
+                lastname: strtolower($params->lastname),
+                birthDate: $params->birthDate,
+                zoneID: $params->zoneID,
+                companyID: $params->companyID,
+                activityID: $params->activityID,
+            )) {
+                return new Result(
+                    code: 406,
+                    response: new ApiResponse(
+                        success: false,
+                        message: "trying to duplicate person.",
+                    ),
+                    logData: new LogData(
+                        type: LogData::INFO,
+                        message: "Action failure : Trying to duplicate person.",
+                        trace: $params,
+                        file: __FILE__,
+                    ),
+                );
+            }
 
-            /* Commit transaction */
+            // * Insert the new Person to database.
+            $personToCreate = new Person(
+                ID: $this->_uuidRepository->generateBytes(),
+                firstname: strtolower($params->firstname),
+                lastname: strtolower($params->lastname),
+                birthDate: $params->birthDate,
+                zone: $zone,
+                activity: $activity,
+                company: $company,
+                createdAt: time(),
+                links: [], // * No link On creation.
+                portrait: null, // * Data from Remote.
+                description: null, // * Data from Remote.
+                pseudonym: null, // * Data from Remote.
+            );
+            $this->_localPersonRepository->createOne($personToCreate);
+
+            // * Commit transaction.
             $this->_db->getMysqli()->commit();
 
-            // Success response.
-            return new Result(code: 201, data: "Action success : new entry in person database.");
+            // * Success response.
+            return new Result(
+                code: 201,
+                response: new ApiResponse(
+                    success: true,
+                    data: $personToCreate,
+                    message: "Person created.",
+                ),
+                logData: new LogData(
+                    type: LogData::INFO,
+                    message: "Action success : Person created with success.",
+                    trace: $personToCreate,
+                    file: __FILE__,
+                ),
+            );
         } catch (Throwable $err) {
-            return new Result(code: 500, data: "Action failure : Internal Server Error.");
+            return new Result(
+                code: 500,
+                response: new ApiResponse(
+                    success: false,
+                    message: "An internal error occured.",
+                ),
+                logData: new LogData(
+                    type: LogData::CRITICAL,
+                    message: "Action failure : Unexpected error occured.",
+                    trace: $err,
+                    file: __FILE__,
+                ),
+            );
         }
     }
 }

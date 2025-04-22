@@ -4,5 +4,8 @@ namespace Domain\Usecases;
 
 readonly class InsertLinkParams
 {
-    public function __construct(public string $personID, public string $link) {}
+    public function __construct(
+        public string $personID,
+        public string $source
+    ) {}
 }

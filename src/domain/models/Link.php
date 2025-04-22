@@ -2,12 +2,19 @@
 
 namespace Domain\Models;
 
+/**
+ * Data structure about Link/Article about a person.
+ */
 readonly class Link
 {
     public function __construct(
-        public string $id,
-        public string $value,
+        /** @var string */
+        public string $ID,
+
+        /** @var string */
+        public string $source,
+
+        /** @var int */
         public int $createdAt,
-        public int|null $updatedAt = null,
     ) {}
 }

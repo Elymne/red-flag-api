@@ -10,7 +10,8 @@
     "autoload": {
         "psr-4": {
             "Core\\": [
-                "src/core"
+                "src/core",
+                "src/core/di"
             ],
             "Domain\\Models\\": [
                 "src/domain/models"
@@ -34,20 +35,23 @@
                 "src/infra/datasources/local/database",
                 "src/infra/datasources/remote"
             ],
-            "Infra\\Di\\": [
-                "src/infra/di"
-            ],
             "Infra\\Env\\": [
                 "src/infra/env"
             ],
             "Infra\\Uuid\\": [
                 "src/infra/uuid"
+            ],
+            "Infra\\Logger\\": [
+                "src/infra/logger"
             ]
         }
     },
     "require": {
         "ramsey/uuid": "^4.7",
-        "pecee/simple-router": "*"
+        "pecee/simple-router": "*",
+        "vlucas/phpdotenv": "^5.6",
+        "zircote/swagger-php": "^5.1",
+        "monolog/monolog": "^3.9"
     },
     "require-dev": {
         "phpunit/phpunit": "12",

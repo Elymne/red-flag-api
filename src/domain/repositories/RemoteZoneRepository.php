@@ -7,19 +7,22 @@ use Domain\Models\Zone;
 interface RemoteZoneRepository
 {
     /**
-     * Fetch the list of cities that can correspond to the name or the id.
+     * Find all zones that could correspond to the name given in argument.
      * 
-     * @param string|null $name
-     * @param string|null $id
+     * @param string $name
      * @return Zone[] - List of cities
      */
-    function findMany(string|null $name = null, string|null $id = null): array;
+    function findMany(
+        string $name
+    ): array;
 
     /**
-     * Fetch the unique city given the code (id).
+     * Fetch the unique zone given the code (id).
      * 
-     * @param string $id
-     * @return Zone|null - The unique city
+     * @param string $ID
+     * @return Zone|null - The unique zone
      */
-    function findUnique(string $id): Zone|null;
+    function findUnique(
+        string $ID
+    ): Zone|null;
 }

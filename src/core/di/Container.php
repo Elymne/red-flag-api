@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Infra\Di;
+namespace Core;
 
 use Exception;
 
@@ -34,25 +34,11 @@ class Container
      */
     private array $_bindings = [];
 
-    /**
-     * Add a new value that will be injected.
-     * 
-     * @param string $key The name of the class or key to get the requested object.
-     * @param callable $builder The function that will run and return the requested object.
-     * The builder can have $args params if needed.
-     */
     public function add(string $key, callable $builder): void
     {
         $this->_bindings[$key] = $builder;
     }
 
-    /**
-     * Fetch the class asked in arg.
-     * 
-     * @param string $key The name of the value requested.
-     * @param array $args Arguments need by the value that we need.
-     * @return mixed The object or value requested.
-     */
     public function resolve(string $key, array $args = []): mixed
     {
         if (!isset($this->_bindings[$key])) {
@@ -60,5 +46,13 @@ class Container
         }
 
         return $this->_bindings[$key]($args);
+    }
+
+    public static function injectAll(): void
+    {
+        $container = Container::get();
+        BuildGateways::inject($container);
+        BuildRepositories::inject($container);
+        BuildUsecases::inject($container);
     }
 }

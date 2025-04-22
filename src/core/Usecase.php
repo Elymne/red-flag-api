@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Core;
 
+use Domain\Gateways\Logger;
+use Infra\Di\Container;
+
 /**
  * Dictate how usecase (Logic between infra database,remote access, librairies etc) should working.
  * A usecase always return a Result object.

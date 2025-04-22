@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Domain\Usecases;
 
+use Core\ApiResponse;
+use Core\LogData;
 use Core\Result;
 use Core\Usecase;
 use Domain\Gateways\DatabaseGateway;
@@ -22,9 +24,33 @@ class RunMigrations extends Usecase
     {
         try {
             $this->_databaseGateway->runMigrations();
-            return new Result(code: 200, data: "Migrations has run succesfully.");
+            return new Result(
+                code: 201,
+                response: new ApiResponse(
+                    success: true,
+                    message: "Migrations has run succesfully.",
+                ),
+                logData: new LogData(
+                    type: LogData::INFO,
+                    message: "Action success : Migrations.",
+                    trace: $params,
+                    file: __FILE__,
+                ),
+            );
         } catch (Throwable $err) {
-            return new Result(code: 500, data: "Action failure : Internal Server Error.");
+            return new Result(
+                code: 500,
+                response: new ApiResponse(
+                    success: false,
+                    message: "An internal error occured.",
+                ),
+                logData: new LogData(
+                    type: LogData::CRITICAL,
+                    message: "Action failure : Unexpected error occured.",
+                    trace: $err,
+                    file: __FILE__,
+                ),
+            );
         }
     }
 }
