@@ -47,6 +47,7 @@ class Router implements RouterGateway
             if ($_ENV["MODE"] == "develop") {
                 /** @var Result */
                 $result = Container::get()->resolve(RunMigrations::class)->perform();
+                header('Content-Type: application/json');
                 http_response_code($result->code);
                 echo json_encode($result->data);
                 exit;

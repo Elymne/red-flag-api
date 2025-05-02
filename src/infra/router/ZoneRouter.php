@@ -27,6 +27,7 @@ class ZoneRouter
                         name: $_GET["name"],
                     )
                 );
+                header('Content-Type: application/json');
                 http_response_code($result->code);
                 echo json_encode($result->data);
                 exit;
@@ -39,6 +40,7 @@ class ZoneRouter
                         name: $_GET["name"] ?? null,
                     )
                 );
+                header('Content-Type: application/json');
                 http_response_code($result->code);
                 echo json_encode($result->data);
                 exit;

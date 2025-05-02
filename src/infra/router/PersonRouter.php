@@ -62,6 +62,7 @@ class PersonRouter
                     jobname: $jobname,
                 ));
                 // send response.
+                header('Content-Type: application/json');
                 http_response_code($result->code);
                 echo json_encode($result->data);
                 exit;
@@ -73,6 +74,7 @@ class PersonRouter
                 // Fetch unique person.
                 $result = $findUniquePerson->perform(new FindUniquePersonParams($id));
                 // send response.
+                header('Content-Type: application/json');
                 http_response_code($result->code);
                 echo json_encode($result->data);
                 exit;
@@ -84,11 +86,12 @@ class PersonRouter
                 // Insert person.
                 $result = $insertPerson->perform(new InsertPersonParams(
                     firstname: $_POST["firstname"],
-                    lastname: $_POST["firstname"],
+                    lastname: $_POST["lastname"],
                     jobname: $_POST["jobname"],
                     zoneID: $_GET["zoneid"]
                 ));
                 // send response.
+                header('Content-Type: application/json');
                 http_response_code($result->code);
                 echo json_encode($result->data);
                 exit;
@@ -103,6 +106,7 @@ class PersonRouter
                     message: $_POST["message"],
                 ));
                 // send response.
+                header('Content-Type: application/json');
                 http_response_code($result->code);
                 echo json_encode($result->data);
                 exit;
@@ -117,6 +121,7 @@ class PersonRouter
                     link: $_POST["link"],
                 ));
                 // send response.
+                header('Content-Type: application/json');
                 http_response_code($result->code);
                 echo json_encode($result->data);
                 exit;
