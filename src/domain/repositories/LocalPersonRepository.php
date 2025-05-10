@@ -39,15 +39,6 @@ interface LocalPersonRepository
     function createOne(Person $person): void;
 
     /**
-     * Add a message about a person in database.
-     * 
-     * @param string $id This database use uuid as ID.
-     * @param Message $message The new message to add to the person.
-     * @return PersonDetailed The detailed person updated with new message.
-     */
-    function addMessage(string $id, Message $message): void;
-
-    /**
      * Add a link (resource, article) about a person in database.
      * 
      * @param string $id This database use uuid as ID.

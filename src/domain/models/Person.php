@@ -8,6 +8,9 @@ readonly class Person
         public string $id,
         public string $firstName,
         public string $lastName,
+        public int $birthday,
+        public string|null $portrait, // * From Wiki API.
+
         public string $jobName,
         public Zone $zone,
 

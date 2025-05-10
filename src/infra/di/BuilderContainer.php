@@ -9,6 +9,7 @@ use Domain\Gateways\RouterGateway;
 use Domain\Repositories\LocalDomainRepository;
 use Domain\Repositories\LocalPersonRepository;
 use Domain\Repositories\LocalZoneRepository;
+use Domain\Repositories\RemotePersonRepository;
 use Domain\Repositories\RemoteZoneRepository;
 use Domain\Repositories\UuidRepository;
 use Domain\Usecases\FindLocalZones;
@@ -26,6 +27,7 @@ use Infra\Datasources\DBConnect;
 use Infra\Datasources\DomainMysqlDatasource;
 use Infra\Datasources\GeoApiDatasource;
 use Infra\Datasources\PersonMysqlDatasource;
+use Infra\Datasources\WikiApiDatasource;
 use Infra\Datasources\ZoneMysqlDatasource;
 
 class BuilderContainer
@@ -64,6 +66,10 @@ class BuilderContainer
 
         $container->add(RemoteZoneRepository::class, function () {
             return new GeoApiDatasource();
+        });
+
+        $container->add(RemotePersonRepository::class, function () {
+            return new WikiApiDatasource();
         });
 
         $container->add(LocalPersonRepository::class, function () use ($container) {
