@@ -11,7 +11,7 @@ use Domain\Repositories\RemotePersonRepository;
 class WikiApiDatasource implements RemotePersonRepository
 {
 
-    function findPerson(string $fullname): PersonRemoteData|null
+    function findAdditionalData(string $fullname): PersonRemoteData|null
     {
         $url = "https://en.wikipedia.org/api/rest_v1/page/summary/" . $fullname;
 

@@ -14,45 +14,60 @@ class Router implements RouterGateway
 {
     public function start(): void
     {
-        // Group all routes to trigger my middleware and catch errors.
+        // * Group all routes to trigger my middleware and catch errors.
         SimpleRouter::group([
             "middleware" => CustomMiddleware::class,
             "exceptionHandler" => ExceptionHandler::class,
         ], function () {
-            // Route : /
-            // Simple entry route that signal that client has reach Redflags API.
-            SimpleRouter::get('/', function () {
-                http_response_code(200);
-                echo "You're hiting Redflags API.";
-                exit;
-            });
-
-            SimpleRouter::get('/test', function () {
-                if ($_ENV["MODE"] == "develop") {
+            // * Routing group api.
+            SimpleRouter::group(
+                ["prefix" => "/api",],
+                function () {
+                    // * Simple GET test route.
+                    SimpleRouter::get("/test", function () {
+                        if ($_ENV["MODE"] == "develop") {
+                            http_response_code(200);
+                            echo "No GET tests.";
+                            exit;
+                        }
+                        http_response_code(404);
+                        echo "This route does not exists.";
+                        exit;
+                    });
+                    // * Simple POST test route.
+                    SimpleRouter::post("/test", function () {
+                        if ($_ENV["MODE"] == "develop") {
+                            http_response_code(200);
+                            echo "No POST tests.";
+                            exit;
+                        }
+                        http_response_code(404);
+                        echo "This route does not exists.";
+                        exit;
+                    });
+                    // * Implements all Zone routes.
+                    ZoneRouter::defineRoutes();
+                    // * Implements all Persons routes.
+                    PersonRouter::defineRoutes();
+                    // * Simple entry route that signal that client has reach Redflags API.
+                    SimpleRouter::get("/", function () {
+                        http_response_code(200);
+                        echo "You're hiting Redflags API.";
+                        exit;
+                    });
                 }
-
-                http_response_code(404);
-                echo "This route does not exists.";
-                exit;
-            });
-
-            // Implements all Zone routes.
-            ZoneRouter::defineRoutes();
-
-            // Implements all Persons routes.
-            PersonRouter::defineRoutes();
+            );
         });
 
-        SimpleRouter::get('/migrations', function () {
+        SimpleRouter::get("/migrations", function () {
             if ($_ENV["MODE"] == "develop") {
                 /** @var Result */
                 $result = Container::get()->resolve(RunMigrations::class)->perform();
-                header('Content-Type: application/json');
+                header("Content-Type: application/json");
                 http_response_code($result->code);
                 echo json_encode($result->data);
                 exit;
             }
-
             http_response_code(404);
             echo "This route does not exists.";
             exit;

@@ -42,53 +42,49 @@ class InsertPerson extends Usecase
     public function perform(mixed $params): Result
     {
         try {
-            // Check $params type.
+            // * Check $params type.
             if (!isset($params) || !($params instanceof InsertPersonParams)) {
                 return new Result(code: 400, data: "Action failure : the data send from body is not correct. Should be a InsertPersonParams structure.");
             }
-
-            // Start transaction
+            // * Start transaction
             $this->_db->getMysqli()->begin_transaction();
-
-            // Check if the zone send from the params exists in our database. When user create a new person, the data that is used for zone localisation is provided by a remote datassouce.
+            // * Check if the zone send from the params exists in our database. When user create a new person, the data that is used for zone localisation is provided by a remote datassouce.
             $zone = $this->_localZoneRepository->findUnique($params->zoneID);
             if (!isset($zone)) {
-                // Trying to fetch the zone from the remote repo. If it doesn't exists, we just send an error response.
+                // * Trying to fetch the zone from the remote repo. If it doesn't exists, we just send an error response.
                 $zone = $this->_remoteZoneRepository->findUnique($params->zoneID);
                 if (!isset($zone)) {
                     return new Result(code: 400, data: "Action failure : the zone code does not exists in remote datasource.");
                 }
                 $this->_localZoneRepository->createOne($zone);
             }
-
-            // Check that user does not exists in database. If it's the case, we just send a 200 response.
+            // * Check that user does not exists in database. If it's the case, we just send a 400 response.
             $usersBeLike = $this->_localPersonRepository->findMany(
-                firstname: $params->firstname,
-                lastname: $params->lastname,
-                jobname: $params->jobname,
+                firstname: strtolower($params->firstname),
+                lastname: strtolower($params->lastname),
+                jobname: strtolower($params->jobname),
                 zonename: $zone->name
             );
             if (count($usersBeLike) != 0) {
                 return new Result(code: 400, data: "Action failure : the person already exists in database.");
             }
-
-            // Insert the new Person to database.
+            // * Insert the new Person to database.
             $this->_localPersonRepository->createOne(
                 new Person(
                     id: $this->_uuidRepository->generate(),
                     firstName: $params->firstname,
                     lastName: $params->lastname,
+                    birthday: $params->birthday,
+                    portrait: null,
                     jobName: $params->jobname,
                     createdAt: time(),
                     updatedAt: null,
                     zone: $zone
                 )
             );
-
-            /* Commit transaction */
+            // * Commit transaction.
             $this->_db->getMysqli()->commit();
-
-            // Success response.
+            // * Success response.
             return new Result(code: 201, data: "Action success : new entry in person database.");
         } catch (Throwable $err) {
             return new Result(code: 500, data: "Action failure : Internal Server Error.");

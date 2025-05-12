@@ -23,12 +23,13 @@ class PersonMysqlDatasource implements LocalPersonRepository
     public function findMany(
         string|null $firstname = null,
         string|null $lastname = null,
+        int|null $birthday = null,
         string|null $zonename = null,
         string|null $jobname = null,
     ): array {
         // * Prapare the statement.
         /** @var string */
-        $query = "SELECT HEX(person.id) as id, first_name, last_name, job_name, birthday, portrait, id_zone, created_at, updated_at, zone.id, zone.name 
+        $query = "SELECT HEX(person.id) as id, first_name, last_name, job_name, birthday, id_zone, created_at, updated_at, zone.id, zone.name 
         FROM person INNER JOIN zone ON zone.id = id_zone 
         WHERE 1=1";
         $params = [];
@@ -112,7 +113,7 @@ class PersonMysqlDatasource implements LocalPersonRepository
         // * Prapare the statement for person data.
         /** @var string */
         $query =
-            "SELECT HEX(person.id) as id, first_name, last_name, job_name, birthday, portrait, id_zone, created_at, updated_at, zone.id, zone.name 
+            "SELECT HEX(person.id) as id, first_name, last_name, job_name, birthday, id_zone, created_at, updated_at, zone.id, zone.name 
             FROM person 
             INNER JOIN zone ON zone.id = id_zone 
             WHERE id = ?";

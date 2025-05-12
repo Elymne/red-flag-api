@@ -107,11 +107,17 @@ class BuilderContainer
         });
 
         $container->add(FindPersons::class, function () use ($container): FindPersons {
-            return new FindPersons($container->resolve(LocalPersonRepository::class));
+            return new FindPersons(
+                $container->resolve(LocalPersonRepository::class),
+                $container->resolve(RemotePersonRepository::class)
+            );
         });
 
         $container->add(FindUniquePerson::class, function () use ($container): FindUniquePerson {
-            return new FindUniquePerson($container->resolve(LocalPersonRepository::class));
+            return new FindUniquePerson(
+                $container->resolve(LocalPersonRepository::class),
+                $container->resolve(RemotePersonRepository::class),
+            );
         });
 
         $container->add(InsertLink::class, function () use ($container): InsertLink {
@@ -125,7 +131,7 @@ class BuilderContainer
         $container->add(InsertMessage::class, function () use ($container): InsertMessage {
             return new InsertMessage(
                 $container->resolve(UuidRepository::class),
-                $container->resolve(LocalPersonRepository::class)
+                $container->resolve(LocalPersonRepository::class),
             );
         });
 

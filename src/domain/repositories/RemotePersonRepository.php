@@ -12,5 +12,5 @@ interface RemotePersonRepository
      * @param string $fullname
      * @return PersonRemoteData
      */
-    function findPerson(string $fullname): PersonRemoteData|null;
+    function findAdditionalData(string $fullname): PersonRemoteData|null;
 }

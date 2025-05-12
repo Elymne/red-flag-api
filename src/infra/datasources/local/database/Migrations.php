@@ -35,14 +35,11 @@ class Migrations
                 last_name VARCHAR(250) NOT NULL,
                 job_name VARCHAR(250) NOT NULL,
                 birthday INT(11) NOT NULL,
-                portrait VARCHAR(250),
                 
                 id_zone VARCHAR(250) NOT NULL,
 
                 created_at INT(11) NOT NULL,
                 updated_at INT(11),
-
-                description VARCHAR(250),
 
                 CONSTRAINT pk_person PRIMARY KEY (id),
                 CONSTRAINT fk_person_zone FOREIGN KEY (id_zone) REFERENCES zone(id)
