@@ -87,6 +87,7 @@ class InsertPerson extends Usecase
             // * Success response.
             return new Result(code: 201, data: "Action success : new entry in person database.");
         } catch (Throwable $err) {
+            echo $err;
             return new Result(code: 500, data: "Action failure : Internal Server Error.");
         }
     }

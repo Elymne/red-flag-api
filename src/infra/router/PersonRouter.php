@@ -80,6 +80,7 @@ class PersonRouter
             });
 
             SimpleRouter::post("/", function () {
+                $data = json_decode(file_get_contents("php://input"), true);
                 /** @var string|null */
                 $firstname = null;
                 /** @var string|null */
@@ -87,22 +88,28 @@ class PersonRouter
                 /** @var string|null */
                 $birthday = null;
                 /** @var string|null */
-                $zonename = null;
+                $zoneID = null;
                 /** @var string|null */
                 $jobname = null;
-                if (!isset($_POST["firstname"]) || isset($_POST["lastname"]) || isset($_POST["birthday"]) || isset($_POST["zonename"]) || isset($_POST["jobname"])) {
+                if (
+                    !isset($data["firstname"]) ||
+                    !isset($data["lastname"]) ||
+                    !isset($data["birthday"]) ||
+                    !isset($data["zoneID"]) ||
+                    !isset($data["jobname"])
+                ) {
                     // * send input error response.
                     header("Content-Type: application/json");
                     http_response_code(400);
-                    echo json_encode("Action failure : Wrong body data.");
+                    echo json_encode("Action failure : Body imcomplete.");
                     exit;
                 }
                 // * Get POST body.
-                $firstname = $_POST["firstname"];
-                $lastname = $_POST["lastname"];
-                $birthday = intval($_POST["birthday"]);
-                $zonename = $_POST["zonename"];
-                $jobname = $_POST["jobname"];
+                $firstname = $data["firstname"];
+                $lastname = $data["lastname"];
+                $birthday = intval($data["birthday"]);
+                $zoneID = $data["zoneID"];
+                $jobname = $data["jobname"];
                 /** @var InsertPerson */
                 $insertPerson = Container::get()->resolve(InsertPerson::class);
                 // * Insert person.
@@ -110,8 +117,8 @@ class PersonRouter
                     firstname: $firstname,
                     lastname: $lastname,
                     birthday: $birthday,
-                    jobname: $zonename,
-                    zoneID: $jobname,
+                    zoneID: $zoneID,
+                    jobname: $jobname,
                 ));
                 // * send response.
                 header("Content-Type: application/json");

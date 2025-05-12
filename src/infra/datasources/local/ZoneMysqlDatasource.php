@@ -86,7 +86,9 @@ class ZoneMysqlDatasource implements LocalZoneRepository
         $query = "INSERT INTO zone (id, name) VALUES (?, ?)";
         $stmt = $this->_db->getMysqli()->prepare($query);
         // Inject values.
-        $stmt->bind_param("ss", $zone->id, $zone->name);
+        $zoneID = $zone->id;
+        $zoneName = $zone->name;
+        $stmt->bind_param("ss", $zoneID, $zoneName);
         // Run SQL Command and fetch result.
         $stmt->execute();
     }

@@ -162,21 +162,29 @@ class PersonMysqlDatasource implements LocalPersonRepository
     {
         // * Prepare statement for person.
         /** @var string */
-        $query = "INSERT INTO person (id, first_name, last_name, job_name, birthday, portrait, created_at, updated_at, id_zone) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $query = "INSERT INTO person (id, first_name, last_name, job_name, birthday, created_at, updated_at, id_zone) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         $stmt = $this->_db->getMysqli()->prepare($query);
-        // * Inject values.
+        // * Inject values. It's PHP so look at this, that's insane.
         $uuid = Uuid::fromString($person->id)->getBytes();
-        $stmt->bind_param("issisiis", [
+        $firstname = $person->firstName;
+        $lastName = $person->lastName;
+        $jobName = $person->jobName;
+        $birthday = $person->birthday;
+        $createdAt = $person->createdAt;
+        $updatedAt = $person->updatedAt;
+        $zoneID =  $person->zone->id;
+
+        $stmt->bind_param(
+            "isssiiis",
             $uuid,
-            $person->firstName,
-            $person->lastName,
-            $person->jobName,
-            $person->birthday,
-            $person->portrait,
-            $person->createdAt,
-            $person->updatedAt,
-            $person->zone->id
-        ]);
+            $firstname,
+            $lastName,
+            $jobName,
+            $birthday,
+            $createdAt,
+            $updatedAt,
+            $zoneID
+        );
         // * Run SQL Command and fetch result.
         $stmt->execute();
     }
