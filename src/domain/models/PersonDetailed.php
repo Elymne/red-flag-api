@@ -10,18 +10,19 @@ readonly class PersonDetailed
         public string $lastName,
         public int $birthday,
 
-        public ?string $portrait, // * Nullable Nullable From Wiki API.
-        public ?string $description, // * Nullable because From Wiki API.
-
         public string $jobName,
         public Zone $zone,
 
         public int $createdAt,
-        public int|null $updatedAt = null,
 
         // * Articles list from website.
         /** @var Link[] */
         public array $links,
+
+        // * Optionnals
+        public int|null $updatedAt = null,
+        public ?string $portrait = null, // * Nullable because From Wiki API.
+        public ?string $description = null, // * Nullable because From Wiki API.
     ) {}
 
     /**
@@ -41,17 +42,17 @@ readonly class PersonDetailed
         ?array $links = null
     ): self {
         return new self(
-            $id ?? $this->id,
-            $firstName ?? $this->firstName,
-            $lastName ?? $this->lastName,
-            $jobName ?? $this->jobName,
-            $birthday ?? $this->birthday,
-            $portrait ?? $this->portrait,
-            $description ?? $this->description,
-            $zone ?? $this->zone,
-            $createdAt ?? $this->createdAt,
-            $updatedAt ?? $this->updatedAt,
-            $links ?? $this->links
+            id: $id ?? $this->id,
+            firstName: $firstName ?? $this->firstName,
+            lastName: $lastName ?? $this->lastName,
+            birthday: $birthday ?? $this->birthday,
+            portrait: $portrait ?? $this->portrait,
+            description: $description ?? $this->description,
+            jobName: $jobName ?? $this->jobName,
+            zone: $zone ?? $this->zone,
+            createdAt: $createdAt ?? $this->createdAt,
+            updatedAt: $updatedAt ?? $this->updatedAt,
+            links: $links ?? $this->links
         );
     }
 }

@@ -2,6 +2,8 @@
 
 namespace Domain\Repositories;
 
+use Domain\Models\Person;
+use Domain\Models\PersonDetailed;
 use Domain\Models\PersonRemoteData;
 
 interface RemotePersonRepository
@@ -12,5 +14,5 @@ interface RemotePersonRepository
      * @param string $fullname
      * @return PersonRemoteData
      */
-    function findAdditionalData(string $fullname): PersonRemoteData|null;
+    function findAdditionalData(Person|PersonDetailed $person): PersonRemoteData|null;
 }

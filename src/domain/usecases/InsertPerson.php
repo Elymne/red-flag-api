@@ -68,7 +68,6 @@ class InsertPerson extends Usecase
             if (count($usersBeLike) != 0) {
                 return new Result(code: 400, data: "Action failure : the person already exists in database.");
             }
-
             // * Insert the new Person to database.
             $this->_localPersonRepository->createOne(
                 new Person(

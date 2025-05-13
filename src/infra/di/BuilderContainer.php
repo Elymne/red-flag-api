@@ -115,6 +115,7 @@ class BuilderContainer
 
         $container->add(FindUniquePerson::class, function () use ($container): FindUniquePerson {
             return new FindUniquePerson(
+                $container->resolve(UuidRepository::class),
                 $container->resolve(LocalPersonRepository::class),
                 $container->resolve(RemotePersonRepository::class),
             );
@@ -125,13 +126,6 @@ class BuilderContainer
                 $container->resolve(UuidRepository::class),
                 $container->resolve(LocalPersonRepository::class),
                 $container->resolve(LocalDomainRepository::class),
-            );
-        });
-
-        $container->add(InsertMessage::class, function () use ($container): InsertMessage {
-            return new InsertMessage(
-                $container->resolve(UuidRepository::class),
-                $container->resolve(LocalPersonRepository::class),
             );
         });
 

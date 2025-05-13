@@ -9,15 +9,18 @@ use Core\Usecase;
 use Domain\Models\PersonDetailed;
 use Domain\Repositories\LocalPersonRepository;
 use Domain\Repositories\RemotePersonRepository;
+use Domain\Repositories\UuidRepository;
 use Throwable;
 
 class FindUniquePerson extends Usecase
 {
+    private UuidRepository $_uuidRepository;
     private LocalPersonRepository $_localPersonRepository;
     private RemotePersonRepository $_remotePersonRepository;
 
-    public function __construct(LocalPersonRepository $localPersonRepository, RemotePersonRepository $remotePersonRepository)
+    public function __construct(UuidRepository $uuidRepository, LocalPersonRepository $localPersonRepository, RemotePersonRepository $remotePersonRepository)
     {
+        $this->_uuidRepository = $uuidRepository;
         $this->_localPersonRepository = $localPersonRepository;
         $this->_remotePersonRepository = $remotePersonRepository;
     }
@@ -37,14 +40,14 @@ class FindUniquePerson extends Usecase
                 return new Result(code: 400, data: "Action failure : the data send from body is not correct. Should be a FindUniquePersonParams structure.");
             }
             // * Search persons corresponding to theses.
-            $person = $this->_localPersonRepository->findUnique($params->id);
+            $uuidBytes = $this->_uuidRepository->toBytes($params->id);
+            $person = $this->_localPersonRepository->findUnique($uuidBytes);
             // * Check the value.
             if (!isset($person)) {
                 return new Result(code: 404, data: "Action failure : this person does not exists.");
             }
             // * Find additionnal data from remote person repository.
-            $fullname = $person->firstName . "_" . $person->lastName;
-            $additionnalData = $this->_remotePersonRepository->findAdditionalData($fullname);
+            $additionnalData = $this->_remotePersonRepository->findAdditionalData($person);
             // * Result return with Person + additionnal data.
             return new Result(
                 200,

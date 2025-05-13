@@ -48,8 +48,7 @@ class FindPersons extends Usecase
             // * Add additionnal data to each person. (image…)
             for ($i = 0; $i < count($persons); $i++) {
                 $person = $persons[$i];
-                $fullname = $person->firstName . "_" . $person->lastName;
-                $additionnalData = $this->_remotePersonRepository->findAdditionalData($fullname);
+                $additionnalData = $this->_remotePersonRepository->findAdditionalData($person);
                 // * Check that data exists, else just pass.
                 if (isset($additionnalData)) {
                     array_push($personsWithAdditionnalData, $person->copyWith(portrait: $additionnalData->portrait));

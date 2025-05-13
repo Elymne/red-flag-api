@@ -16,4 +16,9 @@ class RamseyUuid implements UuidRepository
     {
         return Uuid::uuid4()->getBytes();
     }
+
+    public function toBytes(string $uuid): string
+    {
+        return Uuid::fromString($uuid)->getBytes();
+    }
 }

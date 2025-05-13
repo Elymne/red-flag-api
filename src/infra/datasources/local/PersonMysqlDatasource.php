@@ -9,7 +9,6 @@ use Domain\Models\PersonDetailed;
 use Domain\Models\Link;
 use Domain\Models\Zone;
 use Domain\Repositories\LocalPersonRepository;
-use Ramsey\Uuid\Uuid;
 
 class PersonMysqlDatasource implements LocalPersonRepository
 {
@@ -83,18 +82,18 @@ class PersonMysqlDatasource implements LocalPersonRepository
         return $persons;
     }
 
-    public function findUnique(string $id): PersonDetailed|null
+    public function findUnique(string $uuidBytes): PersonDetailed|null
     {
-        // * Generate bytes from UUID for Mysql version used.
-        $uuid = Uuid::fromString($id)->getBytes();
         // * Prapare the statement for link data.
         $query =
             "SELECT HEX(id_person) as id_person, HEX(id) as id, l.value, l.created_at, l.updated_at 
-            FROM link
+            FROM link as l
             WHERE id_person = ?";
         $stmt = $this->_db->getMysqli()->prepare($query);
         // * Inject the value.
-        $stmt->bind_param("s", $uuid);
+        $stmt->bind_param("b", $uuidBytes);
+        // * Using bytes force me to use this.
+        $stmt->send_long_data(0, $uuidBytes);
         // * Run SQL Command and fetch result.
         $stmt->execute();
         $linksResult = $stmt->get_result();
@@ -113,13 +112,15 @@ class PersonMysqlDatasource implements LocalPersonRepository
         // * Prapare the statement for person data.
         /** @var string */
         $query =
-            "SELECT HEX(person.id) as id, first_name, last_name, job_name, birthday, id_zone, created_at, updated_at, zone.id, zone.name 
+            "SELECT HEX(person.id) as person_id, first_name, last_name, job_name, birthday, id_zone, created_at, updated_at, zone.id as zone_id, zone.name as zone_name
             FROM person 
             INNER JOIN zone ON zone.id = id_zone 
-            WHERE id = ?";
+            WHERE person.id = ?";
         $stmt = $this->_db->getMysqli()->prepare($query);
         // * Inject the value.
-        $stmt->bind_param("s", [$uuid]);
+        $stmt->bind_param("s", $uuidBytes);
+        // * Using bytes force me to use this.
+        $stmt->send_long_data(0, $uuidBytes);
         // * Run SQL Command and fetch result.
         $stmt->execute();
         $PersonsResult = $stmt->get_result();
@@ -128,19 +129,19 @@ class PersonMysqlDatasource implements LocalPersonRepository
         $persons = [];
         while ($row = $PersonsResult->fetch_assoc()) {
             array_push($persons, new PersonDetailed(
-                id: $row["id"],
+                id: $row["person_id"],
                 firstName: $row["first_name"],
                 lastName: $row["last_name"],
                 jobName: $row["job_name"],
-                birthday: $row["birthday"],
+                birthday: intval($row["birthday"]),
 
                 // * Data from Remote API or nothing.
                 portrait: null,
                 description: null,
 
                 zone: new Zone(
-                    id: $row["zone.id"],
-                    name: $row["zone.name"],
+                    id: $row["zone_id"],
+                    name: $row["zone_name"],
                 ),
 
                 links: $links,
@@ -191,16 +192,15 @@ class PersonMysqlDatasource implements LocalPersonRepository
         $stmt->execute();
     }
 
-    function addLink(string $id, Link $link): void
+    function addLink(string $uuidBytes, Link $link): void
     {
         // * Prepare statement for person.
         /** @var string */
         $query = "INSERT INTO link (id, value) VALUES (?, ?)";
         $stmt = $this->_db->getMysqli()->prepare($query);
         // * Inject values.
-        $person_id = Uuid::fromString($id)->getBytes();
-        $link_id = Uuid::fromString($link->id)->getBytes();
-        $stmt->bind_param("issii", [$link_id, $link->value, $person_id, $link->createdAt, $link->updatedAt]);
+        $link_id = $link->id;
+        $stmt->bind_param("issii", [$link_id, $link->value, $uuidBytes, $link->createdAt, $link->updatedAt]);
         // * Run SQL Command and fetch result.
         $stmt->execute();
     }

@@ -10,13 +10,14 @@ readonly class Person
         public string $lastName,
         public int $birthday,
 
-        public ?string $portrait, // * Nullable Nullable From Wiki API.
-
         public string $jobName,
         public Zone $zone,
 
         public int $createdAt,
+
+        // * Optionnals
         public int|null $updatedAt = null,
+        public ?string $portrait = null, // * Nullable Nullable From Wiki API.
     ) {}
 
     public function copyWith(

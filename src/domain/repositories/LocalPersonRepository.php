@@ -23,10 +23,10 @@ interface LocalPersonRepository
     /**
      * Find a unique RedFlag given the id.
      *  
-     * @param string $id
+     * @param string $uuidBytes ID as uuid bytes data.
      * @return PersonDetailed
      */
-    function findUnique(string $id): PersonDetailed|null;
+    function findUnique(string $uuidBytes): PersonDetailed|null;
 
     /**
      * Create a new person entry in local database.

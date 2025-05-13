@@ -4,16 +4,17 @@ declare(strict_types=1);
 
 namespace Infra\Datasources;
 
-
+use Domain\Models\Person;
+use Domain\Models\PersonDetailed;
 use Domain\Models\PersonRemoteData;
 use Domain\Repositories\RemotePersonRepository;
 
 class WikiApiDatasource implements RemotePersonRepository
 {
-    function findAdditionalData(string $fullname): PersonRemoteData|null
+    function findAdditionalData(Person|PersonDetailed $person): PersonRemoteData|null
     {
         //* Prepare request.
-        $ch = curl_init("https://en.wikipedia.org/api/rest_v1/page/summary/" . $fullname);
+        $ch = curl_init("https://en.wikipedia.org/api/rest_v1/page/summary/" . $person->firstName . "_" . $person->lastName);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($ch, CURLOPT_TIMEOUT, 10);
