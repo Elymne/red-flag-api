@@ -50,7 +50,12 @@ class FindPersons extends Usecase
                 $person = $persons[$i];
                 $fullname = $person->firstName . "_" . $person->lastName;
                 $additionnalData = $this->_remotePersonRepository->findAdditionalData($fullname);
-                array_push($personsWithAdditionnalData, $person->copyWith(portrait: $additionnalData->portrait));
+                // * Check that data exists, else just pass.
+                if (isset($additionnalData)) {
+                    array_push($personsWithAdditionnalData, $person->copyWith(portrait: $additionnalData->portrait));
+                } else {
+                    array_push($personsWithAdditionnalData, $person);
+                }
             }
             // * Return persons from remotes.
             return new Result(200, $personsWithAdditionnalData);

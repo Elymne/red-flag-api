@@ -10,23 +10,25 @@ use Domain\Repositories\RemotePersonRepository;
 
 class WikiApiDatasource implements RemotePersonRepository
 {
-
     function findAdditionalData(string $fullname): PersonRemoteData|null
     {
-        //* Request from wiki api.
-        $response = file_get_contents(
-            filename: "https://en.wikipedia.org/api/rest_v1/page/summary/" . $fullname,
-            context: stream_context_create([
-                "http" => [
-                    "method"  => "GET",
-                    "header"  => "Content-type: application/x-www-form-urlencoded",
-                ]
-            ])
-        );
-        // * If 404 or server error or whatever.
-        if (!$response) {
-            return null;
+        //* Prepare request.
+        $ch = curl_init("https://en.wikipedia.org/api/rest_v1/page/summary/" . $fullname);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            "Accept: application/json",
+        ]);
+        // * On dev env, we remove SSL checker.
+        if ($_ENV["MODE"] == "develop") {
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         }
+        // * Send request and close curl prog.
+        $response = curl_exec($ch);
+        curl_close($ch);
+        // * If 404 or server error or whatever.
+        if (!$response) return null;
         // * Decode json data.
         $rawZone = json_decode($response, true);
         // * Return my decoded data.
