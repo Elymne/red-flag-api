@@ -82,18 +82,18 @@ class PersonMysqlDatasource implements LocalPersonRepository
         return $persons;
     }
 
-    public function findUnique(string $uuidBytes): PersonDetailed|null
+    public function findUnique(string $id): PersonDetailed|null
     {
         // * Prapare the statement for link data.
         $query =
-            "SELECT HEX(id_person) as id_person, HEX(id) as id, l.value, l.created_at, l.updated_at 
+            "SELECT HEX(id_person) as id_person, HEX(id) as link_id, l.value as link_value, l.created_at as link_created_at, l.updated_at as link_updated_at
             FROM link as l
             WHERE id_person = ?";
         $stmt = $this->_db->getMysqli()->prepare($query);
         // * Inject the value.
-        $stmt->bind_param("b", $uuidBytes);
+        $stmt->bind_param("b", $id);
         // * Using bytes force me to use this.
-        $stmt->send_long_data(0, $uuidBytes);
+        $stmt->send_long_data(0, $id);
         // * Run SQL Command and fetch result.
         $stmt->execute();
         $linksResult = $stmt->get_result();
@@ -102,10 +102,10 @@ class PersonMysqlDatasource implements LocalPersonRepository
         $links = [];
         while ($row = $linksResult->fetch_assoc()) {
             array_push($links, new Link(
-                id: $row["id"],
-                value: $row["l.value"],
-                createdAt: $row["l.created_at"],
-                updatedAt: $row["l.updated_at"],
+                id: $row["link_id"],
+                value: $row["link_value"],
+                createdAt: $row["link_created_at"],
+                updatedAt: $row["link_updated_at"],
             ));
         }
 
@@ -118,9 +118,9 @@ class PersonMysqlDatasource implements LocalPersonRepository
             WHERE person.id = ?";
         $stmt = $this->_db->getMysqli()->prepare($query);
         // * Inject the value.
-        $stmt->bind_param("s", $uuidBytes);
+        $stmt->bind_param("s", $id);
         // * Using bytes force me to use this.
-        $stmt->send_long_data(0, $uuidBytes);
+        $stmt->send_long_data(0, $id);
         // * Run SQL Command and fetch result.
         $stmt->execute();
         $PersonsResult = $stmt->get_result();
@@ -192,15 +192,21 @@ class PersonMysqlDatasource implements LocalPersonRepository
         $stmt->execute();
     }
 
-    function addLink(string $uuidBytes, Link $link): void
+    function addLink(string $personID, Link $link): void
     {
         // * Prepare statement for person.
         /** @var string */
-        $query = "INSERT INTO link (id, value) VALUES (?, ?)";
+        $query = "INSERT INTO link (id, value, created_at, id_person) VALUES (?, ?, ?, ?)";
         $stmt = $this->_db->getMysqli()->prepare($query);
         // * Inject values.
-        $link_id = $link->id;
-        $stmt->bind_param("issii", [$link_id, $link->value, $uuidBytes, $link->createdAt, $link->updatedAt]);
+        $linkID = $link->id;
+        $linkValue = $link->value;
+        $linkCreatedAt = $link->createdAt;
+        // * Bind params.
+        $stmt->bind_param("bsib", $linkID, $linkValue, $linkCreatedAt, $personID);
+        // * Using bytes force me to use this.
+        $stmt->send_long_data(0, $linkID);
+        $stmt->send_long_data(3, $personID);
         // * Run SQL Command and fetch result.
         $stmt->execute();
     }

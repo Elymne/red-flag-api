@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Infra\Router;
 
+use Infra\Di\Container;
 use Domain\Usecases\FindPersons;
 use Domain\Usecases\FindPersonsParams;
 use Domain\Usecases\FindUniquePerson;
@@ -12,7 +13,6 @@ use Domain\Usecases\InsertLink;
 use Domain\Usecases\InsertLinkParams;
 use Domain\Usecases\InsertPerson;
 use Domain\Usecases\InsertPersonParams;
-use Infra\Di\Container;
 use Pecee\SimpleRouter\SimpleRouter;
 
 /**
@@ -82,17 +82,9 @@ class PersonRouter
             });
 
             SimpleRouter::post("/", function () {
+                // * get body post.
                 $data = json_decode(file_get_contents("php://input"), true);
-                /** @var string|null */
-                $firstname = null;
-                /** @var string|null */
-                $lastname = null;
-                /** @var string|null */
-                $birthday = null;
-                /** @var string|null */
-                $zoneID = null;
-                /** @var string|null */
-                $jobname = null;
+                // * Check that each value from body exists.
                 if (
                     !isset($data["firstname"]) ||
                     !isset($data["lastname"]) ||
@@ -106,21 +98,15 @@ class PersonRouter
                     echo json_encode("Action failure : Body imcomplete.");
                     exit;
                 }
-                // * Get POST body.
-                $firstname = $data["firstname"];
-                $lastname = $data["lastname"];
-                $birthday = intval($data["birthday"]);
-                $zoneID = $data["zoneID"];
-                $jobname = $data["jobname"];
                 /** @var InsertPerson */
                 $insertPerson = Container::get()->resolve(InsertPerson::class);
                 // * Insert person.
                 $result = $insertPerson->perform(new InsertPersonParams(
-                    firstname: $firstname,
-                    lastname: $lastname,
-                    birthday: $birthday,
-                    zoneID: $zoneID,
-                    jobname: $jobname,
+                    firstname: $data["firstname"],
+                    lastname: $data["lastname"],
+                    birthday: intval($data["birthday"]),
+                    zoneID: $data["zoneID"],
+                    jobname: $data["jobname"],
                 ));
                 // * send response.
                 header("Content-Type: application/json");
@@ -130,12 +116,25 @@ class PersonRouter
             });
 
             SimpleRouter::post("/links", function () {
+                // * Get body post.
+                $data = json_decode(file_get_contents("php://input"), true);
+                // * Check that each value from body exists.
+                if (
+                    !isset($data["personID"]) ||
+                    !isset($data["link"])
+                ) {
+                    // * send input error response.
+                    header("Content-Type: application/json");
+                    http_response_code(400);
+                    echo json_encode("Action failure : Body imcomplete.");
+                    exit;
+                }
                 /** @var InsertLink */
-                $findMessage = Container::get()->resolve(InsertLink::class);
+                $insertLink = Container::get()->resolve(InsertLink::class);
                 // * Insert link.
-                $result = $findMessage->perform(new InsertLinkParams(
-                    personID: $_POST["personid"],
-                    link: $_POST["link"],
+                $result = $insertLink->perform(new InsertLinkParams(
+                    personID: $data["personID"],
+                    link: $data["link"],
                 ));
                 // * send response.
                 header("Content-Type: application/json");
