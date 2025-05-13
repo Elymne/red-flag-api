@@ -9,6 +9,11 @@ class RamseyUuid implements UuidRepository
 {
     public function generate(): string
     {
-        return Uuid::uuid4();
+        return Uuid::uuid4()->toString();
+    }
+
+    public function generateBytes(): string
+    {
+        return Uuid::uuid4()->getBytes();
     }
 }

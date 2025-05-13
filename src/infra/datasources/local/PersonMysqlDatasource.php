@@ -29,7 +29,7 @@ class PersonMysqlDatasource implements LocalPersonRepository
     ): array {
         // * Prapare the statement.
         /** @var string */
-        $query = "SELECT HEX(person.id) as id, first_name, last_name, job_name, birthday, id_zone, created_at, updated_at, zone.id, zone.name 
+        $query = "SELECT HEX(person.id) as id, first_name, last_name, job_name, birthday, id_zone, created_at, updated_at, zone.id as zone_id, zone.name as zone_name 
         FROM person INNER JOIN zone ON zone.id = id_zone 
         WHERE 1=1";
         $params = [];
@@ -62,7 +62,7 @@ class PersonMysqlDatasource implements LocalPersonRepository
         $persons = [];
         while ($row = $result->fetch_assoc()) {
             array_push($persons, new Person(
-                id: $row["person_id"],
+                id: $row["id"],
                 firstName: $row["first_name"],
                 lastName: $row["last_name"],
                 jobName: $row["job_name"],
@@ -72,8 +72,8 @@ class PersonMysqlDatasource implements LocalPersonRepository
                 portrait: null,
 
                 zone: new Zone(
-                    id: $row["zone.id"],
-                    name: $row["zone.name"],
+                    id: $row["zone_id"],
+                    name: $row["zone_name"],
                 ),
 
                 createdAt: $row["created_at"],
@@ -165,7 +165,7 @@ class PersonMysqlDatasource implements LocalPersonRepository
         $query = "INSERT INTO person (id, first_name, last_name, job_name, birthday, created_at, updated_at, id_zone) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         $stmt = $this->_db->getMysqli()->prepare($query);
         // * Inject values. It's PHP so look at this, that's insane.
-        $uuid = Uuid::fromString($person->id)->getBytes();
+        $uuid = $person->id;
         $firstname = $person->firstName;
         $lastName = $person->lastName;
         $jobName = $person->jobName;
@@ -173,9 +173,9 @@ class PersonMysqlDatasource implements LocalPersonRepository
         $createdAt = $person->createdAt;
         $updatedAt = $person->updatedAt;
         $zoneID =  $person->zone->id;
-
+        // * Bind aprams.
         $stmt->bind_param(
-            "isssiiis",
+            "bsssiiis",
             $uuid,
             $firstname,
             $lastName,
@@ -185,6 +185,8 @@ class PersonMysqlDatasource implements LocalPersonRepository
             $updatedAt,
             $zoneID
         );
+        // * Using bytes force me to use this.
+        $stmt->send_long_data(0, $uuid);
         // * Run SQL Command and fetch result.
         $stmt->execute();
     }

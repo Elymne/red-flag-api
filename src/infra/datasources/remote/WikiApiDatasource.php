@@ -13,18 +13,23 @@ class WikiApiDatasource implements RemotePersonRepository
 
     function findAdditionalData(string $fullname): PersonRemoteData|null
     {
-        $url = "https://en.wikipedia.org/api/rest_v1/page/summary/" . $fullname;
-
-        $context = stream_context_create([
-            "http" => [
-                "method"  => "GET",
-                "header"  => "Content-type: application/x-www-form-urlencoded",
-            ]
-        ]);
-
-        $response = file_get_contents(filename: $url, context: $context);
+        //* Request from wiki api.
+        $response = file_get_contents(
+            filename: "https://en.wikipedia.org/api/rest_v1/page/summary/" . $fullname,
+            context: stream_context_create([
+                "http" => [
+                    "method"  => "GET",
+                    "header"  => "Content-type: application/x-www-form-urlencoded",
+                ]
+            ])
+        );
+        // * If 404 or server error or whatever.
+        if (!$response) {
+            return null;
+        }
+        // * Decode json data.
         $rawZone = json_decode($response, true);
-
+        // * Return my decoded data.
         return new PersonRemoteData(
             portrait: $rawZone["thumbnail"]["source"],
             description: $rawZone["extract"]

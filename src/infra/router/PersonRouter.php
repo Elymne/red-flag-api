@@ -50,6 +50,7 @@ class PersonRouter
                 if (isset($_GET["jobname"])) {
                     $jobname = $_GET["jobname"];
                 }
+
                 /** @var FindPersons */
                 $findPersons = Container::get()->resolve(FindPersons::class);
                 // * Fetch persons.
@@ -66,6 +67,7 @@ class PersonRouter
                 echo json_encode($result->data);
                 exit;
             });
+
 
             SimpleRouter::get("/{id}", function ($id) {
                 /** @var FindUniquePerson */
