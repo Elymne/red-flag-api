@@ -476,3 +476,6 @@ composer.lock
 ##### Vscode settings
 .vscode
 .env
+
+##### Logs
+/logs/*
