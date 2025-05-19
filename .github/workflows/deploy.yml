@@ -23,3 +23,5 @@ jobs:
           server-dir: ${{ secrets.FTP_SERVERPATH }}
           port: ${{ secrets.FTP_PORT }}
           protocol: ftp
+
+          
