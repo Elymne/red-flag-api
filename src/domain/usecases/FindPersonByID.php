@@ -88,7 +88,7 @@ class FindPersonByID extends Usecase
                 code: 200,
                 response: new ApiResponse(
                     success: true,
-                    data: $person->copyWith(
+                    data: $additionnalData === null ? $person : $person->copyWith(
                         portrait: $additionnalData->portrait,
                         description: $additionnalData->description,
                     ),
