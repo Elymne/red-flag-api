@@ -24,11 +24,11 @@ class Run extends Usecase
         try {
             if ($_ENV["MODE"] == "develop") {
                 header("Access-Control-Allow-Origin: *");
-                ini_set('display_errors', 1);
+                ini_set("display_errors", 1);
             }
 
             if ($_ENV["MODE"] == "prod") {
-                ini_set('display_errors', 0);
+                ini_set("display_errors", 0);
             }
 
             $this->_routerGateway->start();
