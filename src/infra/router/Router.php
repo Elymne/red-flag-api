@@ -33,6 +33,10 @@ class Router implements RouterGateway
                         readfile(ROOT_PATH . "/public/docs/index.html");
                         exit;
                     });
+                    SimpleRouter::get("/logs", function () {
+                        require_once(ROOT_PATH . "/public/logs/index.php");
+                        exit;
+                    });
                     SimpleRouter::get("/", function () {
                         http_response_code(200);
                         echo "You're hiting Redflags API.";

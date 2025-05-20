@@ -1,0 +1,49 @@
+name: FTP Deployment
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  ftp-deploy:
+    name: FTP Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Run Autoload
+        run: composer dump-autoload
+
+      - name: Create .env file
+        run: |
+          echo "MODE=master" > .env
+          echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env
+          echo "DB_DATABASE=${{ secrets.DB_DATABASE }}" >> .env
+          echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> .env
+          echo "DB_PWD=${{ secrets.DB_PWD }}" >> .env
+          echo "FRANCE_TRAVAIL_API_ID=${{ secrets.FRANCE_TRAVAIL_API_ID }}" >> .env
+          echo "FRANCE_TRAVAIL_API_KEY=${{ secrets.FRANCE_TRAVAIL_API_KEY }}" >> .env
+
+      - name: FTP Deploy
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: ${{ secrets.FTP_SERVERPATH }}
+          port: ${{ secrets.FTP_PORT }}
+          protocol: ftp
+          local-dir: ./
+
+          
