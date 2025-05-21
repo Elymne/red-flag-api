@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Infra\Router;
 
+use Core\ApiResponse;
 use Domain\Usecases\FindCompanies;
 use Domain\Usecases\FindCompaniesParams;
 use Domain\Usecases\FindCompanyByID;
@@ -15,6 +16,14 @@ class CompanyRouter
 {
     public function getCompanies(): void
     {
+        if (!isset($_GET["name"])) {
+            http_response_code(406);
+            echo json_encode(new ApiResponse(
+                success: false,
+                message: "You must provide a name through query params."
+            ));
+            exit;
+        }
         /** @var FindCompanies */
         $findCompanies = Container::get()->resolve(FindCompanies::class);
         /** @var Result */

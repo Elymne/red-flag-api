@@ -52,7 +52,7 @@ class FindActivities extends Usecase
             }
 
             // * Fetch all remotes activities.
-            $activities = $this->_remoteActivityRepository->findAll();
+            $activities = $this->_remoteActivityRepository->findMany(name: $params->name);
 
             // * Return activities.
             return new Result(
@@ -77,7 +77,7 @@ class FindActivities extends Usecase
                 ),
                 logData: new LogData(
                     type: LogData::CRITICAL,
-                    message: "Action failure : Unexpected error occured.",
+                    message: "Action failure : Exception catch.",
                     trace: $err,
                     file: __FILE__,
                 ),

@@ -7,6 +7,8 @@ namespace Infra\Datasources;
 use Core\NetworkException;
 use Domain\Models\Zone;
 use Domain\Repositories\RemoteZoneRepository;
+use Exception;
+use PHPUnit\Event\Code\Throwable;
 
 class GeoApiDatasource implements RemoteZoneRepository
 {
@@ -30,7 +32,7 @@ class GeoApiDatasource implements RemoteZoneRepository
 
         // * If 404 or server error or whatever.
         if (!$response) {
-            throw new NetworkException("France Travail Activity error while fetching");
+            throw new Exception("France Travail Activity error while fetching");
         }
 
         // * Decode json data.
