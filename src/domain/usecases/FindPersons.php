@@ -36,9 +36,9 @@ class FindPersons extends Usecase
             // * Check $params FindPersonsParams.
             if (!isset($params) || !($params instanceof FindPersonsParams)) {
                 return new Result(
-                    code: 400,
                     response: new ApiResponse(
                         success: false,
+                        code: 400,
                         message: "An internal error occured.",
                     ),
                     logData: new LogData(
@@ -67,9 +67,9 @@ class FindPersons extends Usecase
             // * Empty result.
             if (count($persons) === 0) {
                 return new Result(
-                    code: 200,
                     response: new ApiResponse(
                         success: true,
+                        code: 200,
                         data: $persons,
                         message: "No data.",
                     ),
@@ -108,9 +108,9 @@ class FindPersons extends Usecase
 
             // * Return persons from remotes.
             return new Result(
-                code: 200,
                 response: new ApiResponse(
                     success: true,
+                    code: 200,
                     data: $personsDetailed,
                     message: "Persons found.",
                 ),
@@ -123,9 +123,9 @@ class FindPersons extends Usecase
             );
         } catch (Throwable $err) {
             return new Result(
-                code: 500,
                 response: new ApiResponse(
                     success: false,
+                    code: 500,
                     message: "An internal error occured.",
                 ),
                 logData: new LogData(

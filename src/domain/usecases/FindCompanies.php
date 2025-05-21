@@ -34,9 +34,9 @@ class FindCompanies extends Usecase
             // * Check $params FindCompaniesParams.
             if (!isset($params) || !($params instanceof FindCompaniesParams)) {
                 return new Result(
-                    code: 400,
                     response: new ApiResponse(
                         success: false,
+                        code: 400,
                         message: "An internal error occured.",
                     ),
                     logData: new LogData(
@@ -56,9 +56,9 @@ class FindCompanies extends Usecase
 
             // * Return companies.
             return new Result(
-                code: 200,
                 response: new ApiResponse(
                     success: true,
+                    code: 200,
                     data: $companies,
                     message: "Companies found.",
                 ),
@@ -70,9 +70,9 @@ class FindCompanies extends Usecase
             );
         } catch (Throwable $err) {
             return new Result(
-                code: 500,
                 response: new ApiResponse(
                     success: false,
+                    code: 500,
                     message: "An internal error occured.",
                 ),
                 logData: new LogData(

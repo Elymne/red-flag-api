@@ -25,43 +25,51 @@ class PersonRouter
 {
     public function getPersons(): void
     {
-        /** @var string|null */
-        $firstname = isset($_GET["firstname"]) ? $_GET["firstname"] : null;
-        /** @var string|null */
-        $lastname = isset($_GET["lastname"]) ? $_GET["lastname"] : null;
-        /** @var int|null */
-        $birthDate = isset($_GET["birthDate"]) ? intval($_GET["birthDate"])  : null;
-        /** @var string|null */
-        $zoneID = isset($_GET["zoneID"]) ? $_GET["zoneID"] : null;
-        /** @var string|null */
-        $companyID = isset($_GET["companyID"]) ? $_GET["companyID"] : null;
-        /** @var string|null */
-        $activityID = isset($_GET["activityID"]) ? $_GET["activityID"] : null;
-        /** @var FindPersons */
-        $findPersons = Container::get()->resolve(FindPersons::class);
-        $result = $findPersons->perform(new FindPersonsParams(
-            firstname: $firstname,
-            lastname: $lastname,
-            birthDate: $birthDate,
-            zoneID: $zoneID,
-            companyID: $companyID,
-            activityID: $activityID,
-        ));
+        /** @var ApiResponse */
+        $response = Cache::run($_SERVER["REQUEST_URI"], 86_400, function () {
+            /** @var string|null */
+            $firstname = isset($_GET["firstname"]) ? $_GET["firstname"] : null;
+            /** @var string|null */
+            $lastname = isset($_GET["lastname"]) ? $_GET["lastname"] : null;
+            /** @var int|null */
+            $birthDate = isset($_GET["birthDate"]) ? intval($_GET["birthDate"])  : null;
+            /** @var string|null */
+            $zoneID = isset($_GET["zoneID"]) ? $_GET["zoneID"] : null;
+            /** @var string|null */
+            $companyID = isset($_GET["companyID"]) ? $_GET["companyID"] : null;
+            /** @var string|null */
+            $activityID = isset($_GET["activityID"]) ? $_GET["activityID"] : null;
+            /** @var FindPersons */
+            $findPersons = Container::get()->resolve(FindPersons::class);
+            $result = $findPersons->perform(new FindPersonsParams(
+                firstname: $firstname,
+                lastname: $lastname,
+                birthDate: $birthDate,
+                zoneID: $zoneID,
+                companyID: $companyID,
+                activityID: $activityID,
+            ));
+            return $result->response;
+        });
         header("Content-Type: application/json");
-        http_response_code($result->code);
-        echo json_encode($result->response);
+        http_response_code($response->code);
+        echo json_encode($response);
         exit;
     }
 
     public function getPersonByID($id): void
     {
-        /** @var FindPersonByID */
-        $FindLocalPerson = Container::get()->resolve(FindPersonByID::class);
-        /** @var Result */
-        $result = $FindLocalPerson->perform(new FindPersonByIDParams($id));
+        /** @var ApiResponse */
+        $response = Cache::run($_SERVER["REQUEST_URI"], 86_400, function () use ($id) {
+            /** @var FindPersonByID */
+            $FindLocalPerson = Container::get()->resolve(FindPersonByID::class);
+            /** @var Result */
+            $result = $FindLocalPerson->perform(new FindPersonByIDParams($id));
+            return $result->response;
+        });
         header("Content-Type: application/json");
-        http_response_code($result->code);
-        echo json_encode($result->response);
+        http_response_code($response->code);
+        echo json_encode($response);
         exit;
     }
 
@@ -80,6 +88,7 @@ class PersonRouter
             http_response_code(406);
             echo json_encode(new ApiResponse(
                 success: false,
+                code: 406,
                 message: "Query missing : {firstname}, {lastname}, {birthDate}, {zoneID}, {companyID} and {activityID} should be provided.",
             ));
             exit;
@@ -96,7 +105,7 @@ class PersonRouter
             activityID: $data["activityID"],
         ));
         header("Content-Type: application/json");
-        http_response_code($result->code);
+        http_response_code($result->response->code);
         echo json_encode($result->response);
         exit;
     }
@@ -104,14 +113,12 @@ class PersonRouter
     public function addLink(): void
     {
         $data = json_decode(file_get_contents("php://input"), true);
-        if (
-            !isset($data["personID"]) ||
-            !isset($data["source"])
-        ) {
+        if (!isset($data["personID"]) || !isset($data["source"])) {
             header("Content-Type: application/json");
             http_response_code(406);
             echo json_encode(new ApiResponse(
                 success: false,
+                code: 406,
                 message: "Query missing : {personID} and {source} should be provided.",
             ));
             exit;
@@ -124,7 +131,7 @@ class PersonRouter
             source: $data["link"],
         ));
         header("Content-Type: application/json");
-        http_response_code($result->code);
+        http_response_code($result->response->code);
         echo json_encode($result->response);
         exit;
     }

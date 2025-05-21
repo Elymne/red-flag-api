@@ -9,9 +9,8 @@ use Domain\Gateways\LoggerGateway;
 readonly class Result
 {
     public function __construct(
-        public int $code, // * http code response or 1/0.
         public LogData $logData, // * LogData Information.
-        public ApiResponse|null $response = null, // * The response content. (what client see).
+        public ApiResponse|SystemResponse|null $response = null, // * The response content. (what client see).
     ) {
         // * Create log message for each action from my server.
         $logger = Container::get()->resolve(LoggerGateway::class);

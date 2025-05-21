@@ -34,9 +34,9 @@ class FindActivityByID extends Usecase
             // * Check $params FindActivitiesParams.
             if (!isset($params) || !($params instanceof FindActivityByIDParams)) {
                 return new Result(
-                    code: 400,
                     response: new ApiResponse(
                         success: false,
+                        code: 400,
                         message: "An internal error occured.",
                     ),
                     logData: new LogData(
@@ -57,9 +57,9 @@ class FindActivityByID extends Usecase
             // * Check the value.
             if (!isset($activity)) {
                 return new Result(
-                    code: 404,
                     response: new ApiResponse(
                         success: false,
+                        code: 404,
                         message: "Activity not found.",
                     ),
                     logData: new LogData(
@@ -72,9 +72,9 @@ class FindActivityByID extends Usecase
 
             // * Return the activity.
             return new Result(
-                code: 200,
                 response: new ApiResponse(
                     success: true,
+                    code: 200,
                     data: $activity,
                     message: "Activity found.",
                 ),
@@ -86,9 +86,9 @@ class FindActivityByID extends Usecase
             );
         } catch (Throwable $err) {
             return new Result(
-                code: 500,
                 response: new ApiResponse(
                     success: false,
+                    code: 500,
                     message: "An internal error occured.",
                 ),
                 logData: new LogData(

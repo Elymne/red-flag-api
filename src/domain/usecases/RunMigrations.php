@@ -25,9 +25,9 @@ class RunMigrations extends Usecase
         try {
             $this->_databaseGateway->runMigrations();
             return new Result(
-                code: 201,
                 response: new ApiResponse(
                     success: true,
+                    code: 201,
                     message: "Migrations has run succesfully.",
                 ),
                 logData: new LogData(
@@ -39,9 +39,9 @@ class RunMigrations extends Usecase
             );
         } catch (Throwable $err) {
             return new Result(
-                code: 500,
                 response: new ApiResponse(
                     success: false,
+                    code: 500,
                     message: "An internal error occured.",
                 ),
                 logData: new LogData(
