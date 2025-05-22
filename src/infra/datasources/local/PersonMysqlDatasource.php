@@ -37,32 +37,32 @@ class PersonMysqlDatasource implements LocalPersonRepository
         if (isset($firstname)) {
             $query .= " AND first_name = ?";
             $types .= "s";
-            $params[] = $firstname;
+            array_push($params, $firstname);
         }
         if (isset($lastname)) {
             $query .= " AND last_name = ?";
             $types .= "s";
-            $params[] = $lastname;
+            array_push($params, $lastname);
         }
         if (isset($birthDate)) {
             $query .= " AND birth_date = ?";
             $types .= "i";
-            $params[] = $birthDate;
+            array_push($params, $birthDate);
         }
         if (!is_null($activityID)) {
             $query .= " AND id_activity = ?";
             $types .= "s";
-            $params[] = $activityID;
+            array_push($params, $activityID);
         }
         if (!is_null($companyID)) {
             $query .= " AND id_company = ?";
             $types .= "s";
-            $params[] = $companyID;
+            array_push($params, $companyID);
         }
         if (!is_null($zoneID)) {
             $query .= " AND id_zone = ?";
             $types .= "s";
-            $params[] = $zoneID;
+            array_push($params, $zoneID);
         }
         $stmt = $this->_db->getMysqli()->prepare($query);
 
@@ -85,26 +85,44 @@ class PersonMysqlDatasource implements LocalPersonRepository
         string $firstname,
         string $lastname,
         int $birthDate,
-        string $activityID,
-        string $companyID,
         string $zoneID,
+        string|null $companyID,
+        string|null $activityID,
     ): bool {
         // * Prepare the statement.
         /** @var string */
-        $query = "SELECT count(*) as nb
-            FROM person
-            WHERE first_name = ? AND last_name = ? AND birth_date = ? AND id_activity = ? AND id_company = ? AND id_zone = ?";
+        $query = "SELECT count(*) as nb FROM person WHERE first_name = ? AND last_name = ? AND birth_date = ? AND id_zone = ?";
+        /** @var string */
+        $types = "ssis";
+        /** @var mixed[] */
+        $params = [
+            $firstname,
+            $lastname,
+            $birthDate,
+            $zoneID
+        ];
+        if (isset($companyID)) {
+            $query .= " AND id_company = ?";
+            $types .= "s";
+            array_push($params, $companyID);
+        }
+        if (isset($activityID)) {
+            $query .= " AND id_activity = ?";
+            $types .= "s";
+            array_push($params, $activityID);
+        }
+
         $stmt = $this->_db->getMysqli()->prepare($query);
 
         // * Inject values.
-        $stmt->bind_param("ssisss", $firstname, $lastname, $birthDate, $activityID, $companyID, $zoneID);
+        $stmt->bind_param($types, ...$params);
 
         // * Run SQL Command and fetch result.
         $stmt->execute();
         $result = $stmt->get_result();
 
         // * Get the first line only.
-        $nb = intval(mysqli_fetch_assoc($result)["nb"]);
+        $nb = mysqli_fetch_assoc($result)["nb"];
 
         // * Check if ppl exists or not.
         return $nb > 0;
@@ -172,8 +190,8 @@ class PersonMysqlDatasource implements LocalPersonRepository
         $lastName = $person->lastname;
         $birthDate = $person->birthDate;
         $zoneID = $person->zone->ID;
-        $activityID = $person->activity->ID;
         $companyID = $person->company->ID;
+        $activityID = $person->activity->ID;
         $created_at =  $person->createdAt;
 
         // * Inject params.
@@ -184,8 +202,8 @@ class PersonMysqlDatasource implements LocalPersonRepository
             $lastName,
             $birthDate,
             $zoneID,
-            $activityID,
             $companyID,
+            $activityID,
             $created_at
         );
 

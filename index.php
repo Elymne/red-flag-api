@@ -23,10 +23,10 @@ Container::injectAll();
 // * Load env file.
 /** @var Result */
 $loadEnvResult = Container::get()->resolve(LoadEnv::class)->perform();
-if ($loadEnvResult->code == 1) exit;
+if ($loadEnvResult->response->success == false) exit;
 
 
 // * Run server.
 /** @var Result */
 $runResult = Container::get()->resolve(Run::class)->perform();
-if ($runResult->code == 1) exit;
+if ($runResult->response->success == false) exit;

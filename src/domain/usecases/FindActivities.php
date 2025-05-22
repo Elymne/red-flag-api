@@ -34,9 +34,9 @@ class FindActivities extends Usecase
             // * Check $params FindActivitiesParams.
             if (!isset($params) || !($params instanceof FindActivitiesParams)) {
                 return new Result(
-                    code: 400,
                     response: new ApiResponse(
                         success: false,
+                        code: 400,
                         message: "An internal error occured.",
                     ),
                     logData: new LogData(
@@ -52,13 +52,13 @@ class FindActivities extends Usecase
             }
 
             // * Fetch all remotes activities.
-            $activities = $this->_remoteActivityRepository->findAll();
+            $activities = $this->_remoteActivityRepository->findMany(name: $params->name);
 
             // * Return activities.
             return new Result(
-                code: 200,
                 response: new ApiResponse(
                     success: true,
+                    code: 200,
                     data: $activities,
                     message: "Activities found.",
                 ),
@@ -70,14 +70,14 @@ class FindActivities extends Usecase
             );
         } catch (Throwable $err) {
             return new Result(
-                code: 500,
                 response: new ApiResponse(
                     success: false,
+                    code: 500,
                     message: "An internal error occured.",
                 ),
                 logData: new LogData(
                     type: LogData::CRITICAL,
-                    message: "Action failure : Unexpected error occured.",
+                    message: "Action failure : Exception catch.",
                     trace: $err,
                     file: __FILE__,
                 ),

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Infra\Router;
 
+use Core\ApiResponse;
 use Core\Result;
 use Core\Container;
 use Domain\Usecases\FindActivities;
@@ -21,13 +22,24 @@ class ActivityRouter
     #[OA\Response(response: "500", description: "Action failure : internal Server Error.")]
     public static function getActivities()
     {
-        /** @var FindActivities */
-        $findActivity = Container::get()->resolve(FindActivities::class);
-        /** @var Result */
-        $result = $findActivity->perform(new FindActivitiesParams());
+        /** @var ApiResponse */
+        $response = Cache::run($_SERVER["REQUEST_URI"], 86_400, function () {
+            if (!isset($_GET["name"])) {
+                return new ApiResponse(
+                    success: false,
+                    code: 406,
+                    message: "You must provide a name through query params."
+                );
+            }
+            /** @var FindActivities */
+            $findActivity = Container::get()->resolve(FindActivities::class);
+            /** @var Result */
+            $result = $findActivity->perform(new FindActivitiesParams($_GET["name"]));
+            return $result->response;
+        });
         header("Content-Type: application/json");
-        http_response_code($result->code);
-        echo json_encode($result->response);
+        http_response_code($response->code);
+        echo json_encode($response);
         exit;
     }
 
@@ -38,13 +50,17 @@ class ActivityRouter
     #[OA\Response(response: "500", description: "Action failure : Internal Server Error.")]
     public static function getActivityByID($id)
     {
-        /** @var FindActivityByID */
-        $findActivity = Container::get()->resolve(FindActivityByID::class);
-        /** @var Result */
-        $result = $findActivity->perform(new FindActivityByIDParams(ID: $id));
+        /** @var ApiResponse */
+        $response = Cache::run($_SERVER["REQUEST_URI"], 86_400, function () use ($id) {
+            /** @var FindActivityByID */
+            $findActivity = Container::get()->resolve(FindActivityByID::class);
+            /** @var Result */
+            $result = $findActivity->perform(new FindActivityByIDParams(ID: $id));
+            return $result->response;
+        });
         header("Content-Type: application/json");
-        http_response_code($result->code);
-        echo json_encode($result->response);
+        http_response_code($response->code);
+        echo json_encode($response);
         exit;
     }
 

@@ -33,9 +33,9 @@ class FindZones extends Usecase
             // * Check $params type.
             if (!isset($params) || !($params instanceof FindZonesParams)) {
                 return new Result(
-                    code: 400,
                     response: new ApiResponse(
                         success: false,
+                        code: 400,
                         message: "An internal error occured.",
                     ),
                     logData: new LogData(
@@ -55,9 +55,9 @@ class FindZones extends Usecase
 
             // * Return zones from remotes.
             return new Result(
-                code: 200,
                 response: new ApiResponse(
                     success: true,
+                    code: 200,
                     data: $zones,
                     message: "Zones found.",
                 ),
@@ -70,9 +70,9 @@ class FindZones extends Usecase
             );
         } catch (Throwable $err) {
             return new Result(
-                code: 500,
                 response: new ApiResponse(
                     success: false,
+                    code: 500,
                     message: "An internal error occured.",
                 ),
                 logData: new LogData(

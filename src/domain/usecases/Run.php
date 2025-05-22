@@ -6,6 +6,7 @@ namespace Domain\Usecases;
 
 use Core\LogData;
 use Core\Result;
+use Core\SystemResponse;
 use Core\Usecase;
 use Domain\Gateways\RouterGateway;
 use Throwable;
@@ -33,7 +34,7 @@ class Run extends Usecase
 
             $this->_routerGateway->start();
             return new Result(
-                code: 0,
+                response: new SystemResponse(success: true),
                 logData: new LogData(
                     type: LogData::INTERNAL,
                     message: "Action success : Route loaded",
@@ -42,7 +43,7 @@ class Run extends Usecase
             );
         } catch (Throwable $err) {
             return new Result(
-                code: 1,
+                response: new SystemResponse(success: false),
                 logData: new LogData(
                     type: LogData::CRITICAL,
                     message: "Action failure : Unexpected error occured.",

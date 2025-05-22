@@ -39,9 +39,9 @@ class InsertLink extends Usecase
             // * Check $params type.
             if (!isset($params) || !($params instanceof InsertLinkParams)) {
                 return new Result(
-                    code: 400,
                     response: new ApiResponse(
                         success: false,
+                        code: 400,
                         message: "An internal error occured.",
                     ),
                     logData: new LogData(
@@ -62,9 +62,9 @@ class InsertLink extends Usecase
             // * Check that the URL uses HTTPS.
             if ($parsedUrl["scheme"] != "https") {
                 return new Result(
-                    code: 406,
                     response: new ApiResponse(
                         success: false,
+                        code: 406,
                         message: "Invalid https structure.",
                     ),
                     logData: new LogData(
@@ -81,9 +81,9 @@ class InsertLink extends Usecase
             // * Extract the domain name.
             if (!isset($parsedUrl["host"])) {
                 return new Result(
-                    code: 406,
                     response: new ApiResponse(
                         success: false,
+                        code: 406,
                         message: "Problems with hostname.",
                     ),
                     logData: new LogData(
@@ -100,9 +100,9 @@ class InsertLink extends Usecase
             // * Check that the domain name exists in our filter.
             if (!$this->_localDomainRepository->doesExists($parsedUrl["host"])) {
                 return new Result(
-                    code: 406,
                     response: new ApiResponse(
                         success: false,
+                        code: 406,
                         message: "Not Acceptable hostname.",
                     ),
                     logData: new LogData(
@@ -121,9 +121,9 @@ class InsertLink extends Usecase
             $person = $this->_localPersonRepository->findUnique($personUUID);
             if (!isset($person)) {
                 return new Result(
-                    code: 406,
                     response: new ApiResponse(
                         success: false,
+                        code: 406,
                         message: "Person not found.",
                     ),
                     logData: new LogData(
@@ -142,9 +142,9 @@ class InsertLink extends Usecase
                 if ($link == null) continue;
                 if ($link->source === $params->source) {
                     return new Result(
-                        code: 400,
                         response: new ApiResponse(
                             success: false,
+                            code: 400,
                             message: "Trying to duplicate link.",
                         ),
                         logData: new LogData(
@@ -168,9 +168,9 @@ class InsertLink extends Usecase
 
             // * Success response.
             return new Result(
-                code: 201,
                 response: new ApiResponse(
                     success: true,
+                    code: 201,
                     message: "Link created.",
                 ),
                 logData: new LogData(
@@ -182,9 +182,9 @@ class InsertLink extends Usecase
             );
         } catch (Throwable $err) {
             return new Result(
-                code: 500,
                 response: new ApiResponse(
                     success: false,
+                    code: 500,
                     message: "An internal error occured.",
                 ),
                 logData: new LogData(

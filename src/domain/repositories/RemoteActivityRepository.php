@@ -15,6 +15,14 @@ interface RemoteActivityRepository
     function findAll(): array;
 
     /**
+     * Fetch all activities from a remote repository.
+     * I need this because I want to list every activities that can be associated to a person while creating one.
+     * 
+     * @return Activity[] - List of activities.
+     */
+    function findMany(string $name): array;
+
+    /**
      * Fetch unique activity given his ID.
      * I need this because person data from database only have an activity_id.
      * 

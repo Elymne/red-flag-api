@@ -40,9 +40,9 @@ class FindPersonByID extends Usecase
             // * Check $params type.
             if (!isset($params) || !($params instanceof FindPersonByIDParams)) {
                 return new Result(
-                    code: 400,
                     response: new ApiResponse(
                         success: false,
+                        code: 400,
                         message: "An internal error occured.",
                     ),
                     logData: new LogData(
@@ -64,9 +64,9 @@ class FindPersonByID extends Usecase
             // * Check the value.
             if (!isset($person)) {
                 return new Result(
-                    code: 404,
                     response: new ApiResponse(
                         success: false,
+                        code: 404,
                         message: "Person not found.",
                     ),
                     logData: new LogData(
@@ -85,9 +85,9 @@ class FindPersonByID extends Usecase
 
             // * Result return with Person + additionnal data.
             return new Result(
-                code: 200,
                 response: new ApiResponse(
                     success: true,
+                    code: 200,
                     data: $additionnalData === null ? $person : $person->copyWith(
                         portrait: $additionnalData->portrait,
                         description: $additionnalData->description,
@@ -102,9 +102,9 @@ class FindPersonByID extends Usecase
             );
         } catch (Throwable $err) {
             return new Result(
-                code: 500,
                 response: new ApiResponse(
                     success: false,
+                    code: 500,
                     message: "An internal error occured.",
                 ),
                 logData: new LogData(

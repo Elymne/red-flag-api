@@ -44,9 +44,9 @@ interface LocalPersonRepository
         string $firstname,
         string $lastname,
         int $birthDate,
-        string $activityID,
-        string $companyID,
         string $zoneID,
+        string|null $activityID,
+        string|null $companyID,
     ): bool;
 
     /**

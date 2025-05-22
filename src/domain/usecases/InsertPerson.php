@@ -51,9 +51,9 @@ class InsertPerson extends Usecase
             // * Check $params type.
             if (!isset($params) || !($params instanceof InsertPersonParams)) {
                 return new Result(
-                    code: 400,
                     response: new ApiResponse(
                         success: false,
+                        code: 400,
                         message: "An internal error occured.",
                     ),
                     logData: new LogData(
@@ -75,9 +75,9 @@ class InsertPerson extends Usecase
             $zone = $this->_remoteZoneRepository->findUnique($params->zoneID);
             if (!isset($zone)) {
                 return new Result(
-                    code: 404,
                     response: new ApiResponse(
                         success: false,
+                        code: 404,
                         message: "Zone not found.",
                     ),
                     logData: new LogData(
@@ -95,9 +95,9 @@ class InsertPerson extends Usecase
                 $company = $this->_remoteCompanyRepository->findUnique($params->companyID);
                 if (!isset($company)) {
                     return new Result(
-                        code: 404,
                         response: new ApiResponse(
                             success: false,
+                            code: 404,
                             message: "Company not found.",
                         ),
                         logData: new LogData(
@@ -116,9 +116,9 @@ class InsertPerson extends Usecase
                 $activity = $this->_remoteActivityRepository->findUnique($params->activityID);
                 if (!isset($activity)) {
                     return new Result(
-                        code: 404,
                         response: new ApiResponse(
                             success: false,
+                            code: 404,
                             message: "Activity not found.",
                         ),
                         logData: new LogData(
@@ -140,9 +140,9 @@ class InsertPerson extends Usecase
                 activityID: $params->activityID,
             )) {
                 return new Result(
-                    code: 406,
                     response: new ApiResponse(
                         success: false,
+                        code: 406,
                         message: "trying to duplicate person.",
                     ),
                     logData: new LogData(
@@ -176,9 +176,9 @@ class InsertPerson extends Usecase
 
             // * Success response.
             return new Result(
-                code: 201,
                 response: new ApiResponse(
                     success: true,
+                    code: 201,
                     data: $personToCreate,
                     message: "Person created.",
                 ),
@@ -191,9 +191,9 @@ class InsertPerson extends Usecase
             );
         } catch (Throwable $err) {
             return new Result(
-                code: 500,
                 response: new ApiResponse(
                     success: false,
+                    code: 500,
                     message: "An internal error occured.",
                 ),
                 logData: new LogData(

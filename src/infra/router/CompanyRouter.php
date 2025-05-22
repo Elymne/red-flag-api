@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Infra\Router;
 
+use Core\ApiResponse;
 use Domain\Usecases\FindCompanies;
 use Domain\Usecases\FindCompaniesParams;
 use Domain\Usecases\FindCompanyByID;
@@ -15,25 +16,41 @@ class CompanyRouter
 {
     public function getCompanies(): void
     {
-        /** @var FindCompanies */
-        $findCompanies = Container::get()->resolve(FindCompanies::class);
-        /** @var Result */
-        $result = $findCompanies->perform(new FindCompaniesParams(name: $_GET["name"]));
+        /** @var ApiResponse */
+        $response = Cache::run($_SERVER["REQUEST_URI"], 86_400, function () {
+            if (!isset($_GET["name"])) {
+                http_response_code();
+                return new ApiResponse(
+                    success: false,
+                    code: 406,
+                    message: "You must provide a name through query params."
+                );
+            }
+            /** @var FindCompanies */
+            $findCompanies = Container::get()->resolve(FindCompanies::class);
+            /** @var Result */
+            $result = $findCompanies->perform(new FindCompaniesParams(name: $_GET["name"]));
+            return $result->response;
+        });
         header("Content-Type: application/json");
-        http_response_code($result->code);
-        echo json_encode($result->response);
+        http_response_code($response->code);
+        echo json_encode($response);
         exit;
     }
 
     public function getCompanyByID($id): void
     {
-        /** @var FindCompanyByID */
-        $findCompany = Container::get()->resolve(FindCompanyByID::class);
-        /** @var Result */
-        $result = $findCompany->perform(new FindCompanyByIDParams(ID: $id));
+        /** @var ApiResponse */
+        $response = Cache::run($_SERVER["REQUEST_URI"], 86_400, function () use ($id) {
+            /** @var FindCompanyByID */
+            $findCompany = Container::get()->resolve(FindCompanyByID::class);
+            /** @var Result */
+            $result = $findCompany->perform(new FindCompanyByIDParams(ID: $id));
+            return $result->response;
+        });
         header("Content-Type: application/json");
-        http_response_code($result->code);
-        echo json_encode($result->response);
+        http_response_code($response->code);
+        echo json_encode($response);
         exit;
     }
 

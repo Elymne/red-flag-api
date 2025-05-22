@@ -28,7 +28,9 @@
             ],
             "Infra\\Router\\": [
                 "src/infra/router",
-                "src/infra/router/handlers"
+                "src/infra/router/handlers",
+                "src/infra/router/cache",
+                "src/infra/router/limiter"
             ],
             "Infra\\Datasources\\": [
                 "src/infra/datasources/local",

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Infra\Router;
 
+use Core\ApiResponse;
 use Core\Container;
 use Core\Result;
 use Domain\Usecases\FindZones;
@@ -19,19 +20,25 @@ class ZoneRouter
     #[OA\Response(response: "500", description: "Action failure : Internal Server Error.")]
     public static function getZones(): void
     {
+        /** @var ApiResponse */
+        $response = Cache::run($_SERVER["REQUEST_URI"], 86_400, function () {
+            if (!isset($_GET["name"])) {
+                return new ApiResponse(
+                    success: false,
+                    code: 406,
+                    message: "The query param [name] have to be set",
+
+                );
+            }
+            /** @var FindZones */
+            $findRemoteZones = Container::get()->resolve(FindZones::class);
+            /** @var Result */
+            $result = $findRemoteZones->perform(new FindZonesParams(name: $_GET["name"]));
+            return $result->response;
+        });
         header("Content-Type: application/json");
-        if (!isset($_GET["name"])) {
-            http_response_code(400);
-            echo json_encode("The query param [name] have to be set");
-            exit;
-        }
-        $nameParam = $_GET["name"];
-        /** @var FindZones */
-        $findRemoteZones = Container::get()->resolve(FindZones::class);
-        /** @var Result */
-        $result = $findRemoteZones->perform(new FindZonesParams(name: $nameParam));
-        http_response_code($result->code);
-        echo json_encode($result->response);
+        http_response_code($response->code);
+        echo json_encode($response);
         exit;
     }
 
