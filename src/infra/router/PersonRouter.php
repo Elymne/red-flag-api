@@ -128,7 +128,7 @@ class PersonRouter
         /** @var Result */
         $result = $insertLink->perform(new InsertLinkParams(
             personID: $data["personID"],
-            source: $data["link"],
+            source: $data["source"],
         ));
         header("Content-Type: application/json");
         http_response_code($result->response->code);
