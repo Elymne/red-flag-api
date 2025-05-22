@@ -99,7 +99,7 @@ class FranceTravailActivityDatasource implements RemoteActivityRepository
         $token = FranceTravailToken::generate();
 
         // * Prepare Request.
-        $ch = curl_init("https://api.francetravail.io/partenaire/rome-metiers/v1/metiers/appellation/" . $ID);
+        $ch = curl_init("https://api.francetravail.io/partenaire/rome-metiers/v1/metiers/metier/" . $ID);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($ch, CURLOPT_TIMEOUT, 10);
