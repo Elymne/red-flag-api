@@ -122,7 +122,7 @@ class FranceTravailActivityDatasource implements RemoteActivityRepository
 
         // * Parse and return.
         return new Activity(
-            ID: $rawActivities["code"],
+            ID: strval($rawActivities["code"]),
             name: $rawActivities["libelle"]
         );
     }
