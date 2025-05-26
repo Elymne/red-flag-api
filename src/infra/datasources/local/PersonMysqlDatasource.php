@@ -101,15 +101,21 @@ class PersonMysqlDatasource implements LocalPersonRepository
             $birthDate,
             $zoneID
         ];
+
         if (isset($companyID)) {
             $query .= " AND id_company = ?";
             $types .= "s";
             array_push($params, $companyID);
+        } else {
+            $query .= " AND id_company IS NULL";
         }
+
         if (isset($activityID)) {
             $query .= " AND id_activity = ?";
             $types .= "s";
             array_push($params, $activityID);
+        } else {
+            $query .= " AND id_activity IS NULL";
         }
 
         $stmt = $this->_db->getMysqli()->prepare($query);
@@ -190,8 +196,8 @@ class PersonMysqlDatasource implements LocalPersonRepository
         $lastName = $person->lastname;
         $birthDate = $person->birthDate;
         $zoneID = $person->zone->ID;
-        $companyID = $person->company->ID;
-        $activityID = $person->activity->ID;
+        $companyID = $person->company?->ID ?? null;
+        $activityID = $person->activity?->ID ?? null;
         $created_at =  $person->createdAt;
 
         // * Inject params.
