@@ -2,8 +2,6 @@
 
 namespace Domain\Models;
 
-use DateTime;
-
 /**
  * Data Structure of a person from Database or Remote Datasource (Wikipedia for example).
  */
@@ -28,11 +26,11 @@ readonly class Person
         /** @var Zone Can come from Remote Data */
         public Zone $zone,
 
-        /** @var Activity|null The current activity. Can be unknwown. */
-        public Activity|null $activity,
+        /** @var Activity The current activity. */
+        public Activity $activity,
 
-        /** @var Company|null The current company. Can be unknwown. */
-        public Company|null $company,
+        /** @var Company The current company. */
+        public Company $company,
 
         /** @var Link[] */
         public array $links,
