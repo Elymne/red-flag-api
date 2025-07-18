@@ -8,7 +8,10 @@ use Core\ApiResponse;
 use Core\LogData;
 use Core\Result;
 use Core\Usecase;
+use Domain\Models\Activity;
+use Domain\Models\Company;
 use Domain\Models\Person;
+use Domain\Models\Zone;
 use Domain\Repositories\LocalPersonRepository;
 use Domain\Repositories\RemoteActivityRepository;
 use Domain\Repositories\RemoteCompanyRepository;
@@ -72,6 +75,7 @@ class InsertPerson extends Usecase
             $this->_db->getMysqli()->begin_transaction();
 
             // * Check that the zoneID exists.
+            /** @var Zone */
             $zone = $this->_remoteZoneRepository->findUnique($params->zoneID);
             if (!isset($zone)) {
                 return new Result(
@@ -89,46 +93,42 @@ class InsertPerson extends Usecase
             }
 
             // * Check that the companyID exists (if not null).
-            /** @var Company|null */
-            $company = null;
-            if (isset($params->companyID)) {
-                $company = $this->_remoteCompanyRepository->findUnique($params->companyID);
-                if (!isset($company)) {
-                    return new Result(
-                        response: new ApiResponse(
-                            success: false,
-                            code: 404,
-                            message: "Company not found.",
-                        ),
-                        logData: new LogData(
-                            type: LogData::INFO,
-                            message: "Action failure : Company with id $params->companyID not found.",
-                            file: __FILE__,
-                        ),
-                    );
-                }
+            /** @var Company */
+            $company = $this->_remoteCompanyRepository->findUnique($params->companyID);
+            if (!isset($company)) {
+                return new Result(
+                    response: new ApiResponse(
+                        success: false,
+                        code: 404,
+                        message: "Company not found.",
+                    ),
+                    logData: new LogData(
+                        type: LogData::INFO,
+                        message: "Action failure : Company with id $params->companyID not found.",
+                        file: __FILE__,
+                    ),
+                );
             }
 
+
             // * Check that the activityID exists (if not null).
-            /** @var Activity|null */
-            $activity = null;
-            if (isset($params->activityID)) {
-                $activity = $this->_remoteActivityRepository->findUnique($params->activityID);
-                if (!isset($activity)) {
-                    return new Result(
-                        response: new ApiResponse(
-                            success: false,
-                            code: 404,
-                            message: "Activity not found.",
-                        ),
-                        logData: new LogData(
-                            type: LogData::INFO,
-                            message: "Action failure : Activity with id $params->activityID not found.",
-                            file: __FILE__,
-                        ),
-                    );
-                }
+            /** @var Activity */
+            $activity = $this->_remoteActivityRepository->findUnique($params->activityID);
+            if (!isset($activity)) {
+                return new Result(
+                    response: new ApiResponse(
+                        success: false,
+                        code: 404,
+                        message: "Activity not found.",
+                    ),
+                    logData: new LogData(
+                        type: LogData::INFO,
+                        message: "Action failure : Activity with id $params->activityID not found.",
+                        file: __FILE__,
+                    ),
+                );
             }
+
 
             // * Check that user does not exists in database. If it's the case, we just send a 406 response.
             if ($this->_localPersonRepository->doesExists(
