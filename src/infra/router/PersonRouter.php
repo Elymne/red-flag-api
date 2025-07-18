@@ -80,7 +80,9 @@ class PersonRouter
             !isset($data["firstname"]) ||
             !isset($data["lastname"]) ||
             !isset($data["birthDate"]) ||
-            !isset($data["zoneID"])
+            !isset($data["zoneID"]) ||
+            !isset($data["companyID"]) ||
+            !isset($data["activityID"])
         ) {
             header("Content-Type: application/json");
             http_response_code(406);
@@ -99,8 +101,8 @@ class PersonRouter
             lastname: $data["lastname"],
             birthDate: intval($data["birthDate"]),
             zoneID: $data["zoneID"],
-            companyID: $data["companyID"] ?? null,
-            activityID: $data["activityID"] ?? null,
+            companyID: $data["companyID"],
+            activityID: $data["activityID"],
         ));
         header("Content-Type: application/json");
         http_response_code($result->response->code);

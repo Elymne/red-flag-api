@@ -9,7 +9,7 @@ readonly class InsertPersonParams
         public string $lastname,
         public int $birthDate,
         public string $zoneID,
-        public string|null $activityID,
-        public string|null $companyID,
+        public string $activityID,
+        public string $companyID,
     ) {}
 }
